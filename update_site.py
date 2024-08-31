@@ -1,7 +1,7 @@
 from os.path import isfile, isdir, split, join
 from os import scandir, makedirs, stat
 from datetime import datetime
-from PyLyX.base.lyx import LYX
+from PyLyX.lyx import LyX
 from PyLyX.lyx2xhtml.xhtml_correct import export2xhtml
 from PyLyX.lyx2xhtml.sraya_xhtml_correct import CSS_FILE, addition_func
 
@@ -30,7 +30,7 @@ def dir_play(full_path: str, func, args=(), index=None, skip=None):
 
 def up_macros(file_path: str, macros_old: str, macros_new: str):
     path, name = split(file_path)
-    f = LYX(path, name)
+    f = LyX(path, name)
     f.find_and_replace(macros_old, macros_new)
 
 
@@ -63,7 +63,7 @@ def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime, 
             output_name = translate_name(output_name)
             result = export2xhtml(input_path, join(output_path, output_name), CSS_FILE, depth, addition_func)
         else:
-            f = LYX(path, name)
+            f = LyX(path, name)
             result = f.export(fmt, join(output_path, output_name))
 
     else:
@@ -106,7 +106,7 @@ def up_all(input_path: str, xhtml_path='', pdf_path=''):
         lp.write(now[:19])
 
 
-INPUT_PATH = 'C:\\Users\\sraya\\Documents\\HUJI\\The Completeness Axiom'
+INPUT_PATH = 'C:\\Users\\sraya\\Documents\\HUJI\\complex'
 XHTML_PATH = 'C:\\Users\\sraya\\Documents\\GitHub\\math'
 PDF_PATH = ''
 # MACROS_OLD = 'C:/Users/sraya/Documents/LyX/MacrosStandard.lyx'
@@ -114,4 +114,4 @@ PDF_PATH = ''
 
 
 if __name__ == '__main__':
-    up_all(INPUT_PATH, XHTML_PATH, PDF_PATH)
+    pass
