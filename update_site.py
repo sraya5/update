@@ -1,9 +1,9 @@
 from os.path import isfile, isdir, split, join
 from os import scandir, makedirs, stat
 from datetime import datetime
+from json import load
+from PyLyX.helper import USER_DIR
 from PyLyX.lyx import LyX
-from PyLyX.lyx2xhtml.xhtml_correct import export2xhtml
-from PyLyX.lyx2xhtml.sraya_xhtml_correct import CSS_FILE, addition_func
 
 
 def dir_play(full_path: str, func, args=(), index=None, skip=None):
@@ -16,7 +16,7 @@ def dir_play(full_path: str, func, args=(), index=None, skip=None):
         name = split(full_path)[1]
         result = func(full_path, *args)
         if result:
-            print(name)
+            print(f'\t\t   {name}')
             index[name] = True
         else:
             index[name] = False
@@ -28,29 +28,18 @@ def dir_play(full_path: str, func, args=(), index=None, skip=None):
     return index
 
 
-def up_macros(file_path: str, macros_old: str, macros_new: str):
-    path, name = split(file_path)
-    f = LyX(path, name)
-    f.find_and_replace(macros_old, macros_new)
-
-
-def up_all_macros(input_path, macros_old, macros_new):
-    dir_play(input_path, up_macros, (macros_old, macros_new))
-
-
 def translate_name(name: str):
     if name.endswith('- d.lyx'):
-        new_name = 'definitions.lyx'
-    elif name.endswith('- c.lyx'):
-        new_name = 'claims.lyx'
+        return 'definitions.xhtml'
+    elif name.endswith('- c.xhtml'):
+        return 'claims.lyx'
     elif name.endswith('- p.lyx'):
-        new_name = 'proofs.lyx'
+        return 'proofs.xhtml'
     else:
-        new_name = name
-    return new_name
+        return name
 
 
-def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime, depth=-1):
+def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime):
     last_edit = datetime.fromtimestamp(stat(input_path).st_mtime)
 
     if last_edit > last_play:
@@ -58,13 +47,8 @@ def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime, 
         output_path = output_path.replace(' ', '_')
         output_path, output_name = split(output_path)
         makedirs(output_path, exist_ok=True)
-
-        if fmt == 'xhtml':
-            output_name = translate_name(output_name)
-            result = export2xhtml(input_path, join(output_path, output_name), CSS_FILE, depth, addition_func)
-        else:
-            f = LyX(path, name)
-            result = f.export(fmt, join(output_path, output_name))
+        f = LyX(path, name)
+        result = f.export(fmt, join(output_path, output_name))
 
     else:
         result = False
@@ -107,10 +91,10 @@ def up_all(input_path: str, xhtml_path='', pdf_path=''):
 
 
 INPUT_PATH = 'C:\\Users\\sraya\\Documents\\HUJI\\complex'
-XHTML_PATH = 'C:\\Users\\sraya\\Documents\\GitHub\\math'
+XHTML_PATH = 'C:\\Users\\sraya\\Documents\\GitHub\\complex'
 PDF_PATH = ''
-# MACROS_OLD = 'C:/Users/sraya/Documents/LyX/MacrosStandard.lyx'
-# MACROS_NEW = 'C:/Users/sraya/AppData/Roaming/LyX2.4/macros/MacrosStandard.lyx'
+MACROS_OLD = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MacrosStandard.lyx'
+MACROS_NEW = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MKmacros.lyx'
 
 
 if __name__ == '__main__':
