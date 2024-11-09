@@ -14,11 +14,11 @@ def dir_play(input_path: str, func, args=(), output_path='', index=None, skip=No
         if isfile(input_path) and input_path.endswith('.lyx'):
             name = split(input_path)[1]
             file = LyX(input_path)
-            result = func(file, output_path, *args)
+            result, error = func(file, output_path, *args)
             if result:
                 print(f'\t\t   {name}')
                 index[name] = True
-            else:
+            elif error:
                 index[name] = False
         elif isdir(input_path):
             print(f'\ndirectory: {input_path}')
@@ -44,7 +44,6 @@ def translate_name(name: str):
 def up_output(file: LyX, output_path: str, fmt: str, last_play: datetime):
     input_path = file.get_path()
     last_edit = datetime.fromtimestamp(stat(input_path).st_mtime)
-    result = False
 
     if last_edit > last_play:
         path, name = split(output_path)
@@ -56,37 +55,44 @@ def up_output(file: LyX, output_path: str, fmt: str, last_play: datetime):
             result = file.export2xhtml(output_path, False)
         else:
             result = file.export(fmt, output_path)
+        return result, not result
+    else:
+        return False, False
 
-    return result
 
-
-def print_index(index: dict):
+def index2string(index: dict):
+    lst = []
     for name in index:
         if index[name] is False:
-            print(name)
+            lst.append(name)
         elif type(index[name]) is dict:
-            print_index(index[name])
+            index2string(index[name])
+    return '\n'.join(lst)
 
 
 def up_all(input_path: str, xhtml_path='', pdf_path=''):
-    with open('last_play.txt', 'r') as lp:
-        time = lp.readline()
-        time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+    # with open('last_play.txt', 'r') as lp:
+    #     time = lp.readline()
+    #     time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+    time = datetime.strptime('2000-10-31 13:46:34', '%Y-%m-%d %H:%M:%S')
 
     index_xhtml, index_pdf = {}, {}
     if xhtml_path:
         print('\n******start convert to xhtml******')
         dir_play(input_path, up_output, ('xhtml', time), xhtml_path, index_xhtml)
         print('\n******end convert to xhtml******')
+        index_string = index2string(index_xhtml)
+        if index_string:
+            print('\n\nThe convert to xhtml of the following file failed:')
+            print(index_string)
     if pdf_path:
         print('\n******start convert to pdf******')
         dir_play(input_path, up_output, ('pdf4', time), pdf_path, index_pdf)
         print('\n******end convert to pdf******')
-
-    print('\nThe convert to xhtml of the following file failed:')
-    print_index(index_xhtml)
-    print('\nThe convert to pdf of the following file failed:')
-    print_index(index_pdf)
+        index_string = index2string(index_pdf)
+        if index_string:
+            print('\n\nThe convert to pdf of the following file failed:')
+            print(index_string)
 
     with open('last_play.txt', 'w') as lp:
         now = datetime.now()
