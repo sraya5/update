@@ -31,11 +31,11 @@ def dir_play(input_path: str, func, args=(), output_path='', index=None, skip=No
 
 
 def translate_name(name: str):
-    if name.endswith('- d.lyx'):
+    if name.endswith('#d.lyx'):
         return 'definitions.xhtml'
-    elif name.endswith('- c.lyx'):
+    elif name.endswith('#c.lyx'):
         return 'claims.xhtml'
-    elif name.endswith('- p.lyx'):
+    elif name.endswith('#p.lyx'):
         return 'proofs.xhtml'
     else:
         return name
@@ -100,7 +100,7 @@ def up_all(input_path: str, xhtml_path='', pdf_path=''):
         lp.write(now[:19])
 
 
-INPUT_PATH = 'C:\\Users\\sraya\\Documents\\HUJI\\The Completeness Axiom - LyX'
+INPUT_PATH = 'C:\\Users\\sraya\\Documents\\HUJI\\summaries'
 XHTML_PATH = 'C:\\Users\\sraya\\Documents\\GitHub\\math'
 PDF_PATH = ''
 MACROS_OLD = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MacrosStandard.lyx'
