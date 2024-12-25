@@ -1,5 +1,5 @@
 from os.path import isfile, isdir, split, join, exists
-from os import scandir, makedirs, stat
+from os import scandir, makedirs, stat, remove
 from datetime import datetime
 from PyLyX import LyX
 
@@ -52,6 +52,8 @@ def up_output(file: LyX, output_path: str, fmt: str, last_play: datetime):
         # output_path = output_path.replace(' ', '_')
         makedirs(path, exist_ok=True)
         if fmt == 'xhtml':
+            if exists(output_path):
+                remove(output_path)
             result = file.export2xhtml(output_path, False)
         else:
             result = file.export(fmt, output_path)
