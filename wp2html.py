@@ -21,10 +21,10 @@ def create_script(source: str, async_=''):
 def css_and_js(html_code, css_files=(), js_files=()):
     css_code = ''
     for path in css_files:
-        css_code += tostring(create_css(path), encoding='utf8') + '\n'
+        css_code += tostring(create_css(path), encoding='unicode') + '\n'
     js_code = ''
     for path in js_files:
-        js_code += tostring(create_script(path), encoding='utf8') + '\n'
+        js_code += tostring(create_script(path), encoding='unicode') + '\n'
     html_code = html_code.replace('</head>', css_code + js_code + '</head>')
     return html_code
 
@@ -50,11 +50,19 @@ def wp_content_and_include(wp_root: str, site_root: str):
         copy(old, new)
 
 
+PAGES = 'data\\wp2html.json'
+OLD_SITE = 'http://math.local'
+NEW_SITE = 'https://math.srayaa.com'
+CSS_FILES = ('https://math.srayaa.com/css/main.css', )
+WP_ROOT =  r'C:\Users\sraya\Documents\math\app\public'
+SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\math'
+
+
 def main():
-    with open('data\\wp2html.json', 'r') as file:
+    with open(PAGES, 'r') as file:
         pages = load(file)
-    site2html(pages, 'http://math.local', 'https://math.srayaa.com')
-    wp_content_and_include(r'C:\Users\sraya\Documents\math\app\public', r'C:\Users\sraya\Documents\GitHub\math')
+    site2html(pages, OLD_SITE, NEW_SITE, CSS_FILES)
+    # wp_content_and_include(WP_ROOT, SITE_ROOT)
 
 
 if __name__ == '__main__':
