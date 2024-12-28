@@ -1,7 +1,6 @@
 from os.path import isfile, isdir, split, join, exists
 from os import scandir, makedirs, stat, remove
 from datetime import datetime
-from PyLyX import LyX
 
 
 def dir_play(input_path: str, func, args=(), output_path='', index=None, skip=None):
