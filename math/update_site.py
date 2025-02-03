@@ -1,6 +1,16 @@
-from os.path import isfile, isdir, split, join, exists
-from os import scandir, makedirs, stat, remove
+from os.path import isfile, isdir, splitext, split, join, exists
+from os import scandir, makedirs, stat
+from copy import deepcopy
+from shutil import copy
 from datetime import datetime
+from lxml.etree import XMLParser, parse, fromstring
+from PyLyX import LyX, convert, xhtml_style, correct_name
+from helper import *
+
+PARSER = XMLParser(recover=True, encoding="utf-8")
+TOPIC_TEMPLATE_TREE = parse(r'C:\Users\sraya\Documents\GitHub\math\references_files\xhtml\topic.xhtml', PARSER)
+CSS_FILES = ('https://math.srayaa.com/references_files/css/topic.css', )
+JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
 
 
 def dir_play(input_path: str, func, args=(), output_path='', index=None, skip=None):
@@ -29,50 +39,36 @@ def dir_play(input_path: str, func, args=(), output_path='', index=None, skip=No
     return index
 
 
-def translate_name(name: str):
-    if name.endswith('#d.lyx'):
-        return 'definitions.xhtml'
-    elif name.endswith('#c.lyx'):
-        return 'claims.xhtml'
-    elif name.endswith('#p.lyx'):
-        return 'proofs.xhtml'
-    else:
-        return name
-
-
 def up_output(file: LyX, output_path: str, fmt: str, last_play: datetime):
     input_path = file.get_path()
     last_edit = datetime.fromtimestamp(stat(input_path).st_mtime)
 
-    if last_edit > last_play:
-        path, name = split(output_path)
-        name = translate_name(name)
-        output_path = join(path, name)
-        # output_path = output_path.replace(' ', '_')
-        makedirs(path, exist_ok=True)
-        if fmt == 'xhtml':
-            if exists(output_path):
-                remove(output_path)
-            result = file.export2xhtml(output_path, False)
+    output_path = splitext(remove_number_sign(output_path))[0]
+    makedirs(split(output_path)[0], exist_ok=True)
+    if fmt == 'xhtml':
+        root, info = convert(file.get_doc(), CSS_FILES, JS_FILES)
+        current = fromstring(xhtml_style(root, output_path, False, info).encode('utf8'))
+        template = deepcopy(TOPIC_TEMPLATE_TREE)
+        output_path = correct_name(output_path, '.xhtml')
+        merge_xhtml(template, current, output_path)
+        # with open(output_path, 'wb') as f:
+        #     f.write(xhtml_bytes)
+        return True, False
+    elif last_edit > last_play:
+        if fmt == 'lyx':
+            output_path = correct_name(output_path, '.lyx')
+            copy(input_path, output_path)
+            result = True
         else:
+            output_path = correct_name(output_path, '.pdf')
             result = file.export(fmt, output_path)
         return result, not result
     else:
         return False, False
 
 
-def index2string(index: dict):
-    lst = []
-    for name in index:
-        if index[name] is False:
-            lst.append(name)
-        elif type(index[name]) is dict:
-            index2string(index[name])
-    return '\n'.join(lst)
-
-
-def up_all(input_path: str, xhtml_path='', pdf_path=''):
-    # with open('last_play.txt', 'r') as lp:
+def up_all(input_path: str, xhtml_path='', pdf_path='', lyx_path=''):
+    # with open(r'data\last_play.txt', 'r') as lp:
     #     time = lp.readline()
     #     time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
     time = datetime.strptime('2000-10-31 13:46:34', '%Y-%m-%d %H:%M:%S')
@@ -94,19 +90,22 @@ def up_all(input_path: str, xhtml_path='', pdf_path=''):
         if index_string:
             print('\n\nThe convert to pdf of the following file failed:')
             print(index_string)
+    if lyx_path:
+        print('\n******start copy LyX******')
+        dir_play(input_path, up_output, ('lyx', time), pdf_path, index_pdf)
+        print('\n******end copy LyX******')
 
-    with open('last_play.txt', 'w') as lp:
+    with open('data/last_play.txt', 'w') as lp:
         now = datetime.now()
         now = str(now)
         lp.write(now[:19])
 
-
-INPUT_PATH = 'C:\\Users\\sraya\\Documents\\HUJI\\summaries'
-XHTML_PATH = 'C:\\Users\\sraya\\Documents\\GitHub\\math'
-PDF_PATH = ''
-MACROS_OLD = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MacrosStandard.lyx'
-MACROS_NEW = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MKmacros.lyx'
-
-
 if __name__ == '__main__':
-    up_all(INPUT_PATH, XHTML_PATH, PDF_PATH)
+    INPUT_PATH = r'C:\Users\sraya\Documents\HUJI\summaries'
+    XHTML_PATH = r'C:\Users\sraya\Documents\GitHub\math'
+    # PDF_PATH = r'C:\Users\sraya\Documents\GitHub\math'
+    PDF_PATH = ''
+    LYX_PATH = ''
+    MACROS_OLD = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MacrosStandard.lyx'
+    MACROS_NEW = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MKmacros.lyx'
+    up_all(INPUT_PATH, XHTML_PATH, PDF_PATH, LYX_PATH)
