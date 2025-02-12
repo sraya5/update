@@ -1,58 +1,45 @@
-from os.path import isfile, isdir, splitext, split, join, exists
-from os import scandir, makedirs, stat
+from os import makedirs, stat, chdir
+from json import load
+from subprocess import run,DEVNULL
 from copy import deepcopy
 from shutil import copy
 from datetime import datetime
-from lxml.etree import XMLParser, parse, fromstring
+from update.wp2html import site2html
+from xml.etree.ElementTree import XMLParser, parse
 from PyLyX import LyX, convert, xhtml_style, correct_name
 from helper import *
 
-PARSER = XMLParser(recover=True, encoding="utf-8")
-TOPIC_TEMPLATE_TREE = parse(r'C:\Users\sraya\Documents\GitHub\math\references_files\xhtml\topic.xhtml', PARSER)
-CSS_FILES = ('https://math.srayaa.com/references_files/css/topic.css', )
+with open(r'data\math_pages.json', 'r') as f:
+    PAGES = load(f)
+with open(r'data\replaces.json', 'r') as f:
+    REPLACES = load(f)
+SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\math'
+WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
+REFERENCES = join(SITE_ROOT, r'references_files')
+
+PARSER = XMLParser(encoding="utf-8")
+TOPIC_TEMPLATE_TREE = parse(r'C:\Users\sraya\Documents\GitHub\math\references_files\xhtml\topic.xhtml', PARSER).getroot()
+CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
+INPUT_PATH = r'C:\Users\sraya\Documents\HUJI\summaries'
+OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
 
 
-def dir_play(input_path: str, func, args=(), output_path='', index=None, skip=None):
-    if skip and input_path in skip:
-        return None
-    elif index is None:
-        index = {}
+def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime):
+    if not input_path.endswith('.lyx'):
+        return False, False
 
-    if exists(input_path):
-        if isfile(input_path) and input_path.endswith('.lyx'):
-            name = split(input_path)[1]
-            file = LyX(input_path)
-            result, error = func(file, output_path, *args)
-            if result:
-                print(f'\t\t   {name}')
-                index[name] = True
-            elif error:
-                index[name] = False
-        elif isdir(input_path):
-            print(f'\ndirectory: {input_path}')
-            index[input_path] = {}
-            for entry in scandir(input_path):
-                dir_play(join(input_path, entry.name), func, args, join(output_path, entry.name), index[input_path], skip)
-    else:
-        raise FileNotFoundError(f'not found such file or directory: {input_path}')
-    return index
-
-
-def up_output(file: LyX, output_path: str, fmt: str, last_play: datetime):
-    input_path = file.get_path()
     last_edit = datetime.fromtimestamp(stat(input_path).st_mtime)
 
     output_path = splitext(remove_number_sign(output_path))[0]
     makedirs(split(output_path)[0], exist_ok=True)
+    file = LyX(input_path)
     if fmt == 'xhtml':
-        root, info = convert(file.get_doc(), CSS_FILES, JS_FILES)
-        current = fromstring(xhtml_style(root, output_path, False, info).encode('utf8'))
+        current, info = convert(file.get_doc(), ('https://math.srayaa.com/references_files/css/topic.css', ), CSS_FOLDER, JS_FILES, True, True)
         template = deepcopy(TOPIC_TEMPLATE_TREE)
+        xhtml_style(current, output_path, False, info)
         output_path = correct_name(output_path, '.xhtml')
-        merge_xhtml(template, current, output_path)
-        # with open(output_path, 'wb') as f:
-        #     f.write(xhtml_bytes)
+        merge_xhtml(template, current, output_path, info['toc'])
         return True, False
     elif last_edit > last_play:
         if fmt == 'lyx':
@@ -67,16 +54,18 @@ def up_output(file: LyX, output_path: str, fmt: str, last_play: datetime):
         return False, False
 
 
-def up_all(input_path: str, xhtml_path='', pdf_path='', lyx_path=''):
+def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_path=''):
     # with open(r'data\last_play.txt', 'r') as lp:
     #     time = lp.readline()
     #     time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
     time = datetime.strptime('2000-10-31 13:46:34', '%Y-%m-%d %H:%M:%S')
 
-    index_xhtml, index_pdf = {}, {}
-    if xhtml_path:
+    # if not test_mode:
+    #     pdf_path = lyx_path = output_path
+    index_xhtml, index_pdf, index_lyx = {}, {}, {}
+    if output_path:
         print('\n******start convert to xhtml******')
-        dir_play(input_path, up_output, ('xhtml', time), xhtml_path, index_xhtml)
+        dir_play(input_path, up_output, (output_path, 'xhtml', time), index_xhtml)
         print('\n******end convert to xhtml******')
         index_string = index2string(index_xhtml)
         if index_string:
@@ -84,7 +73,7 @@ def up_all(input_path: str, xhtml_path='', pdf_path='', lyx_path=''):
             print(index_string)
     if pdf_path:
         print('\n******start convert to pdf******')
-        dir_play(input_path, up_output, ('pdf4', time), pdf_path, index_pdf)
+        dir_play(input_path, up_output, ('pdf4', time), pdf_path)
         print('\n******end convert to pdf******')
         index_string = index2string(index_pdf)
         if index_string:
@@ -92,7 +81,7 @@ def up_all(input_path: str, xhtml_path='', pdf_path='', lyx_path=''):
             print(index_string)
     if lyx_path:
         print('\n******start copy LyX******')
-        dir_play(input_path, up_output, ('lyx', time), pdf_path, index_pdf)
+        dir_play(input_path, up_output, ('lyx', time), pdf_path)
         print('\n******end copy LyX******')
 
     with open('data/last_play.txt', 'w') as lp:
@@ -100,12 +89,21 @@ def up_all(input_path: str, xhtml_path='', pdf_path='', lyx_path=''):
         now = str(now)
         lp.write(now[:19])
 
+    if not test_mode:
+        print('\nupdate site with git.\nthis will take some time, please wait.')
+        chdir(output_path)
+        run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        print('successful update site with git.')
+
+
+def main():
+    site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
+              wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
+    html2xhtml(join(REFERENCES, r'xhtml\topic.html'), join(REFERENCES, r'xhtml\topic.xhtml'), True)
+    html2xhtml(join(REFERENCES, r'xhtml\branch.html'), join(REFERENCES, r'xhtml\branch.xhtml'), True)
+    up_all(INPUT_PATH, OUTPUT_PATH, False)
+
 if __name__ == '__main__':
-    INPUT_PATH = r'C:\Users\sraya\Documents\HUJI\summaries'
-    XHTML_PATH = r'C:\Users\sraya\Documents\GitHub\math'
-    # PDF_PATH = r'C:\Users\sraya\Documents\GitHub\math'
-    PDF_PATH = ''
-    LYX_PATH = ''
-    MACROS_OLD = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MacrosStandard.lyx'
-    MACROS_NEW = 'C:\\Users\\sraya\\AppData\\Roaming\\LyX2.4\\macros\\MKmacros.lyx'
-    up_all(INPUT_PATH, XHTML_PATH, PDF_PATH, LYX_PATH)
+    main()

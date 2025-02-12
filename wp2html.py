@@ -1,7 +1,11 @@
-from os import remove
-from os.path import exists
+from os import remove, chmod, makedirs
+from os.path import exists, join, split
+from shutil import rmtree, copy
+from stat import S_IWRITE
 from requests import get
+from requests.exceptions import ConnectionError
 from xml.etree.ElementTree import Element, tostring
+from wp2html.math.helper import dir_play
 
 
 def create_css(path: str):
@@ -27,15 +31,58 @@ def css_and_js(html_code, css_files=(), js_files=()):
     return html_code
 
 
-def site2html(pages: dict[str, str], replaces: dict[str, str], css_files=(), js_files=()):
+def site2html(pages: dict[str, str], replaces: dict[str, str], css_files=(), js_files=(),
+              wp_root='', site_root='', wp_content='', wp_includes=''):
     for url in pages:
+        try:
+            src = get(url)
+        except ConnectionError:
+            print(f'invalid url: {url}')
+            continue
+        if src.status_code not in {200, 404} or (src.status_code == 404 and not url.endswith('404')):
+            print(f'invalid url: {url}')
+            continue
+        src_txt = src.text
         dst = pages[url]
         if exists(dst):
             remove(dst)
+        for old in replaces:
+            src_txt = src_txt.replace(old, replaces[old])
+        src_txt = css_and_js(src_txt, css_files, js_files)
+        makedirs(split(dst)[0], exist_ok=True)
         with open(dst, 'w', encoding='utf8') as file:
-            src = get(url).text
-            for old in replaces:
-                src = src.replace(old, replaces[old])
-            src = css_and_js(src, css_files, js_files)
-            file.write(src)
-        print(url)
+            file.write(src_txt)
+        print(f'successful conversion: {url}')
+    if wp_root and site_root:
+        wp_content = wp_content if wp_content else join(site_root, 'wp-content')
+        if exists(wp_content):
+            rmtree(wp_content, onerror=remove_readonly)
+        print('\ncopy the "wp-content" folder.\nthis will take some time, please wait.')
+        copy_wp(join(wp_root, 'wp-content'), wp_content)
+
+        wp_includes = wp_includes if wp_includes else join(site_root, 'wp-includes')
+        if exists(wp_includes):
+            rmtree(wp_includes, onerror=remove_readonly)
+        print('copy the "wp-includes" folder.\nthis will take some time, please wait.')
+        copy_wp(join(wp_root, 'wp-includes'), wp_includes)
+
+        print('successful copy of "wp-content" and "wp-includes".\n')
+
+
+def remove_readonly(func, path, _):
+    """Change file permissions and retry deleting"""
+    chmod(path, S_IWRITE)  # Make it writable
+    func(path)
+
+
+def one_file(src: str, dst: str):
+    if src.endswith('.php'):
+        return False, False
+    else:
+        makedirs(split(dst)[0], exist_ok=True)
+        copy(src, dst)
+        return True, False
+
+
+def copy_wp(src, dst):
+    dir_play(src, one_file, (dst,), info_print=False)
