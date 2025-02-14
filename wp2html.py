@@ -1,11 +1,11 @@
 from os import remove, chmod, makedirs
-from os.path import exists, join, split
+from os.path import exists, join, split, isdir
 from shutil import rmtree, copy
 from stat import S_IWRITE
 from requests import get
 from requests.exceptions import ConnectionError
 from xml.etree.ElementTree import Element, tostring
-from wp2html.math.helper import dir_play
+from update.math.helper import dir_play
 
 
 def create_css(path: str):
@@ -56,13 +56,19 @@ def site2html(pages: dict[str, str], replaces: dict[str, str], css_files=(), js_
     if wp_root and site_root:
         wp_content = wp_content if wp_content else join(site_root, 'wp-content')
         if exists(wp_content):
-            rmtree(wp_content, onerror=remove_readonly)
+            if isdir(wp_content):
+                rmtree(wp_content, onerror=remove_readonly)
+            else:
+                remove_readonly(remove, wp_content, None)
         print('\ncopy the "wp-content" folder.\nthis will take some time, please wait.')
         copy_wp(join(wp_root, 'wp-content'), wp_content)
 
         wp_includes = wp_includes if wp_includes else join(site_root, 'wp-includes')
         if exists(wp_includes):
-            rmtree(wp_includes, onerror=remove_readonly)
+            if isdir(wp_content):
+                rmtree(wp_includes, onerror=remove_readonly)
+            else:
+                remove_readonly(remove, wp_includes, None)
         print('copy the "wp-includes" folder.\nthis will take some time, please wait.')
         copy_wp(join(wp_root, 'wp-includes'), wp_includes)
 
@@ -80,9 +86,12 @@ def one_file(src: str, dst: str):
         return False, False
     else:
         makedirs(split(dst)[0], exist_ok=True)
-        copy(src, dst)
+        try:
+            copy(src, dst)
+        except PermissionError:
+            print(f'can not copy {src}')
         return True, False
 
 
 def copy_wp(src, dst):
-    dir_play(src, one_file, (dst,), info_print=False)
+    dir_play(src, one_file, output_path=dst, info_print=False)

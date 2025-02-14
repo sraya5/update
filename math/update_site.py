@@ -1,6 +1,6 @@
 from os import makedirs, stat, chdir
 from json import load
-from subprocess import run,DEVNULL
+from subprocess import run,DEVNULL, CalledProcessError
 from copy import deepcopy
 from shutil import copy
 from datetime import datetime
@@ -8,24 +8,23 @@ from update.wp2html import site2html
 from xml.etree.ElementTree import XMLParser, parse
 from PyLyX import LyX, convert, xhtml_style, correct_name
 from helper import *
+from sitemap_creator import *
+from branches_creator import paste_branches
 
 with open(r'data\math_pages.json', 'r') as f:
     PAGES = load(f)
 with open(r'data\replaces.json', 'r') as f:
     REPLACES = load(f)
-SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\math'
-WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
-REFERENCES = join(SITE_ROOT, r'references_files')
 
 PARSER = XMLParser(encoding="utf-8")
-TOPIC_TEMPLATE_TREE = parse(r'C:\Users\sraya\Documents\GitHub\math\references_files\xhtml\topic.xhtml', PARSER).getroot()
+TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot()
 CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
 INPUT_PATH = r'C:\Users\sraya\Documents\HUJI\summaries'
 OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
 
 
-def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime):
+def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
     if not input_path.endswith('.lyx'):
         return False, False
 
@@ -36,7 +35,7 @@ def up_output(input_path: str, output_path: str, fmt: str, last_play: datetime):
     file = LyX(input_path)
     if fmt == 'xhtml':
         current, info = convert(file.get_doc(), ('https://math.srayaa.com/references_files/css/topic.css', ), CSS_FOLDER, JS_FILES, True, True)
-        template = deepcopy(TOPIC_TEMPLATE_TREE)
+        template = deepcopy(TOPIC_TEMPLATE)
         xhtml_style(current, output_path, False, info)
         output_path = correct_name(output_path, '.xhtml')
         merge_xhtml(template, current, output_path, info['toc'])
@@ -62,27 +61,30 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
 
     # if not test_mode:
     #     pdf_path = lyx_path = output_path
-    index_xhtml, index_pdf, index_lyx = {}, {}, {}
     if output_path:
-        print('\n******start convert to xhtml******')
-        dir_play(input_path, up_output, (output_path, 'xhtml', time), index_xhtml)
-        print('\n******end convert to xhtml******')
+        print('start convert to xhtml...')
+        index_xhtml = dir_play(input_path, up_output, ('xhtml', time), output_path, info_print=False)
+        print('end convert to xhtml.')
         index_string = index2string(index_xhtml)
         if index_string:
-            print('\n\nThe convert to xhtml of the following file failed:')
+            print('\n\nThe conversion of the following files to xhtml is failed:')
             print(index_string)
     if pdf_path:
         print('\n******start convert to pdf******')
-        dir_play(input_path, up_output, ('pdf4', time), pdf_path)
+        index_pdf = dir_play(input_path, up_output, ('pdf4', time), pdf_path)
         print('\n******end convert to pdf******')
         index_string = index2string(index_pdf)
         if index_string:
-            print('\n\nThe convert to pdf of the following file failed:')
+            print('\n\nThe conversion of the following files to pdf is failed:')
             print(index_string)
     if lyx_path:
         print('\n******start copy LyX******')
-        dir_play(input_path, up_output, ('lyx', time), pdf_path)
+        index_lyx = dir_play(input_path, up_output, ('lyx', time), lyx_path)
         print('\n******end copy LyX******')
+        index_string = index2string(index_lyx)
+        if index_string:
+            print('\n\nThe coping of the following files failed:')
+            print(index_string)
 
     with open('data/last_play.txt', 'w') as lp:
         now = datetime.now()
@@ -90,20 +92,32 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
         lp.write(now[:19])
 
     if not test_mode:
-        print('\nupdate site with git.\nthis will take some time, please wait.')
-        chdir(output_path)
-        run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        print('successful update site with git.')
+        result = ''
+        try:
+            print('\nupdate site with git.\nthis will take some time, please wait.')
+            chdir(output_path)
+            result = run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+            result = run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+            result = run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+            print('successful update site with git.')
+        except CalledProcessError as e:
+            print('an error occurred when update site with git.')
+            print(f'error massage: "{e}"')
+            print(f'cmd result is {result}')
 
 
 def main():
     site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
               wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
-    html2xhtml(join(REFERENCES, r'xhtml\topic.html'), join(REFERENCES, r'xhtml\topic.xhtml'), True)
-    html2xhtml(join(REFERENCES, r'xhtml\branch.html'), join(REFERENCES, r'xhtml\branch.xhtml'), True)
-    up_all(INPUT_PATH, OUTPUT_PATH, False)
+    print('create sitemap...')
+    lst = create_list(SITEMAP_XML, '../../', SITEMAP_XML, '../../')
+    paste_list(join(SITE_ROOT, 'about', 'sitemap', 'index.html'), lst)
+    print('create branches...')
+    html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
+    paste_branches(SITEMAP_XML, SITE_ROOT, '../')
+    # html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
+    # up_all(INPUT_PATH, OUTPUT_PATH, False)
+
 
 if __name__ == '__main__':
     main()

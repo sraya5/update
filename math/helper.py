@@ -1,8 +1,15 @@
-from xml.etree.ElementTree import Element, tostring
+from xml.etree.ElementTree import Element, tostring, fromstring
 from lxml import etree, html
 import re
 from os.path import isfile, isdir, split, join, exists, splitext
 from os import scandir, remove
+
+REAL_SITE = 'https://math.srayaa.com'
+SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\math'
+WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
+REFERENCES = join(SITE_ROOT, r'references_files')
+with open(join(REFERENCES, 'xml', 'sitemap.xml'), 'r', encoding='utf8') as f:
+    SITEMAP_XML = fromstring(f.read())
 
 
 def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
@@ -33,15 +40,16 @@ def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
         content_column.append(elem)
 
     name = splitext(split(output_file)[1])[0]
-    pdf_link = root1.findall(".//*[@id='pdf_logo']")[0][0]
-    pdf_link.set('href', f'../{name}.pdf')
-    lyx_link = root1.findall(".//*[@id='lyx_logo']")[0][0]
-    lyx_link.set('href', f'../{name}.lyx')
+    for screen in {'desktop'}:
+        pdf_link = root1.findall(f".//*[@id='pdf_logo_{screen}']")[0][0]
+        pdf_link.set('href', f'../{name}.pdf')
+        lyx_link = root1.findall(f".//*[@id='lyx_logo_{screen}']")[0][0]
+        lyx_link.set('href', f'../{name}.lyx')
 
     # Save merged XHTML
     xhtml_bytes = tostring(root1, encoding='utf8')
-    with open(output_file, 'wb') as f:
-        f.write(xhtml_bytes)
+    with open(output_file, 'wb') as file:
+        file.write(xhtml_bytes)
 
 
 def html2xhtml(html_file, output_file, remove_old=False):
@@ -80,6 +88,30 @@ def html2xhtml(html_file, output_file, remove_old=False):
         remove(html_file)
 
 
+def extract_import_path(name: str, root: Element, path: str):
+    for sub in root:
+        cur_name = sub.get('en_name', '')
+        new_path = join(path, cur_name)
+        if cur_name == name:
+            return new_path
+        else:
+            new_path = extract_import_path(name, sub, new_path)
+            if new_path:
+                return new_path
+    return ''
+
+
+def create_path(element: Element, path: str, root: Element, root_path: str):
+    if element.tag == 'import':
+        new_path = extract_import_path(element.get('en_name'), root, root_path)
+    else:
+        new_path = join(path, element.get('en_name'))
+
+    if element.tag in {'topic', 'introduction', 'appendix', 'import'}:
+        new_path += '.xhtml'
+    return new_path
+
+
 def remove_number_sign(path: str):
     path = path.split('\\')
     for i in range(len(path)):
@@ -99,27 +131,30 @@ def index2string(index: dict):
     return '\n'.join(lst)
 
 
-def dir_play(input_path: str, func, args=('', ), index=None, info_print=True):
+def dir_play(input_path: str, func, args=(), output_path='', info_print=True, index: dict | None = None):
     if index is None:
         index = {}
 
     if exists(input_path):
         if isfile(input_path):
             name = split(input_path)[1]
-            result, error = func(input_path, *args)
-            if result and info_print:
-                print(f'\t\t   {name}')
+            if output_path:
+                result, error = func(input_path, *args, output_path)
+            else:
+                result, error = func(input_path, *args)
+            if result:
                 index[name] = True
-            elif error and info_print:
+                if info_print:
+                    print(f'\t\t   {name}')
+            elif error:
                 index[name] = False
         elif isdir(input_path):
             if info_print:
                 print(f'\ndirectory: {input_path}')
             index[input_path] = {}
-            output_path = str(args[0])
             for entry in scandir(input_path):
-                args = (join(output_path, entry.name), ) + args[1:]
-                dir_play(join(input_path, entry.name), func, args, index[input_path], info_print)
+                new_output_path = join(output_path, entry.name) if output_path else output_path
+                dir_play(join(input_path, entry.name), func, args, new_output_path, info_print, index[input_path])
     else:
         raise FileNotFoundError(f'not found such file or directory: {input_path}')
     return index
