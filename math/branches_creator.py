@@ -4,8 +4,7 @@ from copy import deepcopy
 from xml.etree.ElementTree import Element, fromstring, tostring, indent
 from helper import REFERENCES, create_path
 
-PATH = join(REFERENCES, 'xhtml', 'branch.xhtml')
-with open(PATH, 'r', encoding='utf8') as f:
+with open(join(REFERENCES, 'xhtml', 'branch.xhtml'), 'r', encoding='utf8') as f:
     element = fromstring(f.read())
     column = element.findall(".//*[@id='first_col']")[0]
     indent(column[0])
@@ -39,11 +38,11 @@ def one_topic(topic: Element, new_path: str, depth: int):
     return new_topic
 
 
-def create_topics(course: Element, course_data: Element, data_root: Element, root_path: str):
+def create_topics(course: Element, course_data: Element, branch_name: str, data_root: Element, root_path: str):
     topics = course.findall('.//*ul')[0]
     topics.clear()
     for topic in course_data:
-        path = join(root_path, course_data.get('en_name'))
+        path = join(root_path, branch_name, course_data.get('en_name'))
         new_path = create_path(topic, path, data_root, root_path)
         new_topic = one_topic(topic, new_path, 0)
         topics.append(new_topic)
@@ -87,11 +86,11 @@ def create_details(course: Element, course_data: Element):
         details.append(br)
 
 
-def one_course(course: Element, course_data: Element, data_root: Element, root_path: str):
+def one_course(course: Element, course_data: Element, branch_name: str, data_root: Element, root_path: str):
     course.set('id', course_data.get('en_name'))
     title = course.findall('.//*h3')[0]
     title.text = course_data.get('he_name')
-    create_topics(course, course_data, data_root, root_path)
+    create_topics(course, course_data, branch_name, data_root, root_path)
     create_details(course, course_data)
 
 
@@ -103,7 +102,6 @@ def course_str(course: Element):
 
 
 def one_column(col: list[Element], line: str):
-    line = line[:len(line) - len('</div>\n')] + '\n'
     for course in col:
         line += course_str(course)
     line += '</div>\n'
@@ -114,13 +112,13 @@ def one_branch(branch_data: Element, path: str, data_root: Element, root_path: s
     courses = []
     for course_data in branch_data:
         course = deepcopy(COURSE)
-        one_course(course, course_data, data_root, root_path)
+        one_course(course, course_data, branch_data.get('en_name'), data_root, root_path)
         courses.append(course)
-    mid = len(courses) // 2 + len(courses) % 2
-    first_col = courses[:mid]
-    second_col = courses[mid:]
+    divider = int(branch_data.get('divider', len(courses)//2 + len(courses) % 2))
+    first_col = courses[:divider]
+    second_col = courses[divider:]
 
-    with open(PATH, 'r', encoding='utf8') as temp:
+    with open(path, 'r', encoding='utf8') as temp:
         with open(path + '_', 'wb') as new:
             line = temp.readline()
             while 'id="first_col"' not in line:
@@ -133,6 +131,7 @@ def one_branch(branch_data: Element, path: str, data_root: Element, root_path: s
                 line = temp.readline()
             line = one_column(second_col, line)
             new.write(line.encode('utf8'))
+            new.write('\n</div>\n</div>\n'.encode('utf8'))
 
             while 'id="credit"' not in line:
                 line = temp.readline()

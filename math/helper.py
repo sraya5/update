@@ -90,6 +90,8 @@ def html2xhtml(html_file, output_file, remove_old=False):
 
 def extract_import_path(name: str, root: Element, path: str):
     for sub in root:
+        if sub.tag == 'import':
+            continue
         cur_name = sub.get('en_name', '')
         new_path = join(path, cur_name)
         if cur_name == name:

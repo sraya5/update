@@ -62,25 +62,24 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
     # if not test_mode:
     #     pdf_path = lyx_path = output_path
     if output_path:
-        print('start convert to xhtml...')
+        print('convert summaries to xhtml...')
         index_xhtml = dir_play(input_path, up_output, ('xhtml', time), output_path, info_print=False)
-        print('end convert to xhtml.')
         index_string = index2string(index_xhtml)
         if index_string:
             print('\n\nThe conversion of the following files to xhtml is failed:')
             print(index_string)
     if pdf_path:
-        print('\n******start convert to pdf******')
+        print('\n******start convert summaries to pdf******')
         index_pdf = dir_play(input_path, up_output, ('pdf4', time), pdf_path)
-        print('\n******end convert to pdf******')
+        print('\n******end convert summaries to pdf******')
         index_string = index2string(index_pdf)
         if index_string:
             print('\n\nThe conversion of the following files to pdf is failed:')
             print(index_string)
     if lyx_path:
-        print('\n******start copy LyX******')
+        print('\n******start copy LyX files******')
         index_lyx = dir_play(input_path, up_output, ('lyx', time), lyx_path)
-        print('\n******end copy LyX******')
+        print('\n******end copy LyX files******')
         index_string = index2string(index_lyx)
         if index_string:
             print('\n\nThe coping of the following files failed:')
@@ -106,18 +105,20 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
             print(f'cmd result is {result}')
 
 
-def main():
-    site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
-              wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
-    print('create sitemap...')
-    lst = create_list(SITEMAP_XML, '../../', SITEMAP_XML, '../../')
-    paste_list(join(SITE_ROOT, 'about', 'sitemap', 'index.html'), lst)
-    print('create branches...')
-    html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
-    paste_branches(SITEMAP_XML, SITE_ROOT, '../')
-    # html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
-    # up_all(INPUT_PATH, OUTPUT_PATH, False)
+def main(pages=True, summaries=True, test_mode=False):
+    if pages:
+        site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
+                  wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
+        print('create sitemap...')
+        lst = create_list(SITEMAP_XML, '../../', SITEMAP_XML, '../../')
+        paste_list(join(SITE_ROOT, 'about', 'sitemap', 'index.html'), lst)
+        print('create branches...')
+        html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
+        paste_branches(SITEMAP_XML, SITE_ROOT, '../')
+        html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
+    if summaries:
+        up_all(INPUT_PATH, OUTPUT_PATH, test_mode)
 
 
 if __name__ == '__main__':
-    main()
+    main(summaries=False)
