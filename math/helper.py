@@ -36,15 +36,18 @@ def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
 
     content_column = root1.findall(".//*[@id='content_column']")[0]
     body2 = root2[1]
+    title = body2.findall(".//*[@class='layout Title']")
+    if title:
+        body2.remove(title[0])
     for elem in body2:
         content_column.append(elem)
 
     name = splitext(split(output_file)[1])[0]
     for screen in {'desktop'}:
         pdf_link = root1.findall(f".//*[@id='pdf_logo_{screen}']")[0][0]
-        pdf_link.set('href', f'../{name}.pdf')
+        pdf_link.set('href', f'{name}.pdf')
         lyx_link = root1.findall(f".//*[@id='lyx_logo_{screen}']")[0][0]
-        lyx_link.set('href', f'../{name}.lyx')
+        lyx_link.set('href', f'{name}.lyx')
 
     # Save merged XHTML
     xhtml_bytes = tostring(root1, encoding='utf8')

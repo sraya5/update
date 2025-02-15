@@ -22,9 +22,13 @@ CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
 INPUT_PATH = r'C:\Users\sraya\Documents\HUJI\summaries'
 OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
+REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
+REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
 
 
 def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
+    if input_path.endswith('png'):
+        pass # todo: copy images
     if not input_path.endswith('.lyx'):
         return False, False
 
@@ -34,7 +38,8 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
     makedirs(split(output_path)[0], exist_ok=True)
     file = LyX(input_path)
     if fmt == 'xhtml':
-        current, info = convert(file.get_doc(), ('https://math.srayaa.com/references_files/css/topic.css', ), CSS_FOLDER, JS_FILES, True, True)
+        current, info = convert(file.get_doc(), ('https://math.srayaa.com/references_files/css/topic.css', ), CSS_FOLDER, JS_FILES,
+                                js_in_head=True, keep_data=True, replaces=REPLACES_IMG_PATH)
         template = deepcopy(TOPIC_TEMPLATE)
         xhtml_style(current, output_path, False, info)
         output_path = correct_name(output_path, '.xhtml')
@@ -53,14 +58,13 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
         return False, False
 
 
-def up_all(input_path: str, output_path: str, pdf_path='', lyx_path=''):
-    # with open(r'data\last_play.txt', 'r') as lp:
-    #     time = lp.readline()
-    #     time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
-    time = datetime.strptime('2000-10-31 13:46:34', '%Y-%m-%d %H:%M:%S')
+def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_path=''):
+    with open(r'data\last_play.txt', 'r') as last_play:
+        time = last_play.readline()
+        time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
 
-    # if not test_mode:
-    #     pdf_path = lyx_path = output_path
+    if not test_mode:
+        pdf_path = lyx_path = output_path
     if output_path:
         print('convert summaries to xhtml...')
         index_xhtml = dir_play(input_path, up_output, ('xhtml', time), output_path, info_print=False)
@@ -85,10 +89,10 @@ def up_all(input_path: str, output_path: str, pdf_path='', lyx_path=''):
             print('\n\nThe coping of the following files failed:')
             print(index_string)
 
-    with open('data/last_play.txt', 'w') as lp:
+    with open('data/last_play.txt', 'w') as last_play:
         now = datetime.now()
         now = str(now)
-        lp.write(now[:19])
+        last_play.write(now[:19])
 
 
 def git_update(output_path):
@@ -124,4 +128,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main(summaries=False)
+    main(test_mode=True)

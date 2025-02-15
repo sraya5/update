@@ -1,10 +1,119 @@
+from json import load
 from os.path import isfile, isdir, join, exists, split
 from os import scandir, makedirs, remove, rename
 from PyLyX import LyX
 from PyLyX.objects.Environment import Environment, Container
+from update.math.helper import remove_number_sign
 
 LYX_FILES_OLD = r'C:\Users\sraya\Documents\HUJI\archive\for_LyX\summaries'
-LYX_FILES_NEW = r'C:\Users\sraya\Desktop\summaries'
+# LYX_FILES_NEW = r'C:\Users\sraya\Desktop\summaries'
+LYX_FILES_NEW = r'C:\Users\sraya\Documents\HUJI\summaries'
+TEMPLATE = r'C:\Users\sraya\AppData\Roaming\LyX2.4\templates\0summaries\template.lyx'
+with open('english2hebrew.json', 'r', encoding='utf8') as f:
+    ENGLISH2HEBREW = load(f)
+
+
+START = r"""
+\begin_body
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "C:/Users/sraya/AppData/Roaming/LyX2.4/macros/MKmacros.lyx"
+literal "true"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Right Header
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+fbox{
+\backslash
+thepage}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+leftmark
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Left Header
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+שם הסיכום
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+fbox{
+\backslash
+thepage}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Center Footer
+
+\end_layout
+
+\begin_layout Title
+
+\series bold
+\size huge
+שם הסיכום
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+"""
 
 
 def dir_play(input_path: str, func, args=(), extension='.lyx'):
@@ -44,7 +153,7 @@ def scan(path):
                                 print(f'invalid definitions: {part_path}')
 
 
-def merge(definitions: Environment, proofs: Environment, part_path):
+def merge(definitions: Environment, proofs: Environment, part_path: str):
     lst1 =  [_ for _ in definitions.iter() if _.is_category('Section') and _.tag == 'container']
     lst2 = [_ for _ in proofs.iter() if _.is_category('Section') and _.tag == 'container']
     if len(lst1) == len(lst2):
@@ -57,18 +166,40 @@ def merge(definitions: Environment, proofs: Environment, part_path):
                             defs.append(_)
                 elif not (e.is_category('Section') or e.is_category('Section*')):
                     defs.append(e)
-            lst2[i].open()
-            lst2[i].insert(1, defs)
+            if lst2[i].findall(".//*[class='layout_Subsection']") is None and lst2[i].findall(".//*[class='layout_Subsection*']") is None:
+                thms = Container(Environment('layout', 'Subsection', text='משפטים'))
+                for el in lst2[i][1:]:
+                    thms.append(el)
+                lst2[i].clear(True, True, True)
+                lst2[i].open()
+                lst2[i].append(defs)
+                lst2[i].append(thms)
+            else:
+                lst2[i].open()
+                lst2[i].insert(1, defs)
         part_path = part_path.replace(LYX_FILES_OLD, LYX_FILES_NEW)
         path, name = split(part_path)
         makedirs(path, exist_ok=True)
+
+        if exists(part_path + '.lyx'):
+            remove(part_path + '.lyx')
         file = LyX(part_path + '.lyx', doc_obj=proofs)
+        body = file.get_doc()[1]
+        for e in list(body):
+            if not e.is_category('Section'):
+                body.remove(e)
+        file.find_and_replace(LYX_FILES_OLD, LYX_FILES_NEW)
         file.save()
+
+        title = ENGLISH2HEBREW.get(remove_number_sign(name), 'שם הסיכום')
+        start = START.replace('שם הסיכום', title)
         with open(part_path + '.lyx', 'r', encoding='utf8') as old:
             with open(part_path + '.lyx_', 'x', encoding='utf8') as new:
                 for line in old:
                     if line == '\\font_osf false\n':
                         line = '\\font_roman_osf false\n\\font_sans_osf false\n\\font_typewriter_osf false\n'
+                    elif line == '\\begin_body\n':
+                        line = start
                     new.write(line)
         remove(part_path + '.lyx')
         rename(part_path + '.lyx_', part_path + '.lyx')
@@ -93,4 +224,4 @@ def update(path: str):
 
 if __name__ == '__main__':
     scan(LYX_FILES_OLD)
-    dir_play(LYX_FILES_NEW, update)
+    # dir_play(LYX_FILES_NEW, update)
