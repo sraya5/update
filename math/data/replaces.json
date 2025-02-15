@@ -4,6 +4,5 @@
   "http:\\/\\/": "https:\\/\\/",
   "://math/": "://math.srayaa.com/",
   "/wp-content/": "/references_files/wp-content/",
-  "/wp-includes/": "/references_files/wp-includes/",
-  "&laquo;": ""
+  "/wp-includes/": "/references_files/wp-includes/"
 }

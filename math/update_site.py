@@ -53,7 +53,7 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
         return False, False
 
 
-def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_path=''):
+def up_all(input_path: str, output_path: str, pdf_path='', lyx_path=''):
     # with open(r'data\last_play.txt', 'r') as lp:
     #     time = lp.readline()
     #     time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
@@ -92,31 +92,31 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
 
 
 def git_update(output_path):
-    result = ''
     try:
         print('\nupdate site with git.\nthis will take some time, please wait.')
         chdir(output_path)
-        result = run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        result = run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        result = run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
         print('successful update site with git.')
     except CalledProcessError as e:
         print('an error occurred when update site with git.')
         print(f'error massage: "{e}"')
-        print(f'cmd result is {result}')
 
 
-def main(pages=True, summaries=True, test_mode=False):
+def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=False):
     if pages:
         site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
                   wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
+        html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
+        html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
+    if sitemap:
         print('create sitemap...')
         lst = create_list(SITEMAP_XML, '../../', SITEMAP_XML, '../../')
         paste_list(join(SITE_ROOT, 'about', 'sitemap', 'index.html'), lst)
+    if branches:
         print('create branches...')
-        html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
         paste_branches(SITEMAP_XML, SITE_ROOT, '../')
-        html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
     if summaries:
         up_all(INPUT_PATH, OUTPUT_PATH, test_mode)
     if not test_mode:
