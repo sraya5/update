@@ -110,7 +110,7 @@ def create_path(element_data: Element, path: str, data_root: Element, root_path:
     if element_data.tag == 'import':
         new_path = extract_import_path(element_data.get('en_name'), data_root, root_path)
     else:
-        new_path = join(path, element_data.get('en_name'))
+        new_path = join(path, element_data.get('en_name'), '')
 
     if element_data.tag in {'topic', 'introduction', 'appendix', 'import'}:
         new_path += '.xhtml'

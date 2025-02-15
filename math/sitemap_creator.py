@@ -7,6 +7,8 @@ from helper import create_path
 def create_list(sitemap_xml: Element, path: str, root: Element, root_path: str) -> Element:
     lst = Element('ul')
     for sub in sitemap_xml:
+        if sub.tag == 'figures':
+            continue
         new_sub = Element('li')
         new_path = create_path(sub, path, root, root_path)
         if sub.tag not in {'title', 'none', 'course'}:

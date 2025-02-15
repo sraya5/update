@@ -42,6 +42,8 @@ def create_topics(course: Element, course_data: Element, branch_name: str, data_
     topics = course.findall('.//*ul')[0]
     topics.clear()
     for topic_data in course_data:
+        if topic_data.tag == 'figures':
+            continue
         path = join(root_path, branch_name, course_data.get('en_name'))
         path = create_path(topic_data, path, data_root, root_path)
         topic = one_topic(topic_data, path, 0)
