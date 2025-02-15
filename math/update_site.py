@@ -90,19 +90,20 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
         now = str(now)
         lp.write(now[:19])
 
-    if not test_mode:
-        result = ''
-        try:
-            print('\nupdate site with git.\nthis will take some time, please wait.')
-            chdir(output_path)
-            result = run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-            result = run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-            result = run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-            print('successful update site with git.')
-        except CalledProcessError as e:
-            print('an error occurred when update site with git.')
-            print(f'error massage: "{e}"')
-            print(f'cmd result is {result}')
+
+def git_update(output_path):
+    result = ''
+    try:
+        print('\nupdate site with git.\nthis will take some time, please wait.')
+        chdir(output_path)
+        result = run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        result = run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        result = run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        print('successful update site with git.')
+    except CalledProcessError as e:
+        print('an error occurred when update site with git.')
+        print(f'error massage: "{e}"')
+        print(f'cmd result is {result}')
 
 
 def main(pages=True, summaries=True, test_mode=False):
@@ -118,6 +119,8 @@ def main(pages=True, summaries=True, test_mode=False):
         html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
     if summaries:
         up_all(INPUT_PATH, OUTPUT_PATH, test_mode)
+    if not test_mode:
+        git_update(OUTPUT_PATH)
 
 
 if __name__ == '__main__':

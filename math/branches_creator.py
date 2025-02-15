@@ -2,7 +2,7 @@ from os import remove, rename
 from os.path import join, exists
 from copy import deepcopy
 from xml.etree.ElementTree import Element, fromstring, tostring, indent
-from helper import REFERENCES, create_path
+from helper import REFERENCES, create_path, one_column
 
 with open(join(REFERENCES, 'xhtml', 'branch.xhtml'), 'r', encoding='utf8') as f:
     element = fromstring(f.read())
@@ -41,19 +41,20 @@ def one_topic(topic: Element, new_path: str, depth: int):
 def create_topics(course: Element, course_data: Element, branch_name: str, data_root: Element, root_path: str):
     topics = course.findall('.//*ul')[0]
     topics.clear()
-    for topic in course_data:
+    for topic_data in course_data:
         path = join(root_path, branch_name, course_data.get('en_name'))
-        new_path = create_path(topic, path, data_root, root_path)
-        new_topic = one_topic(topic, new_path, 0)
-        topics.append(new_topic)
+        path = create_path(topic_data, path, data_root, root_path)
+        topic = one_topic(topic_data, path, 0)
+        topics.append(topic)
 
-        if len(topic):
-            lst = Element('ul')
-            new_topic.append(lst)
-            for sub in topic:
-                new_sub = one_topic(sub, new_path, 1)
-                lst.append(new_sub)
-
+        lst = Element('ul')
+        for sub_data in topic_data:
+            sub_path = join(path, sub_data.get('en_name'))
+            sub_path = create_path(sub_data, sub_path, data_root, root_path)
+            sub = one_topic(sub_data, sub_path, 1)
+            lst.append(sub)
+        if len(lst):
+            topic.append(lst)
 
 
 def create_details(course: Element, course_data: Element):
@@ -92,20 +93,6 @@ def one_course(course: Element, course_data: Element, branch_name: str, data_roo
     title.text = course_data.get('he_name')
     create_topics(course, course_data, branch_name, data_root, root_path)
     create_details(course, course_data)
-
-
-def course_str(course: Element):
-    indent(course)
-    course = tostring(course, encoding='utf8').decode('utf8')
-    course = course.replace("<?xml version='1.0' encoding='utf8'?>", '', 1)
-    return course
-
-
-def one_column(col: list[Element], line: str):
-    for course in col:
-        line += course_str(course)
-    line += '</div>\n'
-    return line
 
 
 def one_branch(branch_data: Element, path: str, data_root: Element, root_path: str):

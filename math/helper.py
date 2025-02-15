@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element, tostring, fromstring
+from xml.etree.ElementTree import Element, tostring, fromstring, indent
 from lxml import etree, html
 import re
 from os.path import isfile, isdir, split, join, exists, splitext
@@ -103,15 +103,29 @@ def extract_import_path(name: str, root: Element, path: str):
     return ''
 
 
-def create_path(element: Element, path: str, root: Element, root_path: str):
-    if element.tag == 'import':
-        new_path = extract_import_path(element.get('en_name'), root, root_path)
+def create_path(element_data: Element, path: str, data_root: Element, root_path: str):
+    if element_data.tag == 'import':
+        new_path = extract_import_path(element_data.get('en_name'), data_root, root_path)
     else:
-        new_path = join(path, element.get('en_name'))
+        new_path = join(path, element_data.get('en_name'))
 
-    if element.tag in {'topic', 'introduction', 'appendix', 'import'}:
+    if element_data.tag in {'topic', 'introduction', 'appendix', 'import'}:
         new_path += '.xhtml'
     return new_path
+
+
+def course_str(course: Element):
+    indent(course)
+    course = tostring(course, encoding='utf8').decode('utf8')
+    course = course.replace("<?xml version='1.0' encoding='utf8'?>", '', 1)
+    return course
+
+
+def one_column(col: list[Element], line: str):
+    for course in col:
+        line += course_str(course)
+    line += '</div>\n'
+    return line
 
 
 def remove_number_sign(path: str):
