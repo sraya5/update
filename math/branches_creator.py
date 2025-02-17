@@ -44,15 +44,14 @@ def create_topics(course: Element, course_data: Element, branch_name: str, data_
     for topic_data in course_data:
         if topic_data.tag == 'figures':
             continue
-        path = join(root_path, branch_name, course_data.get('en_name'))
-        path = create_path(topic_data, path, data_root, root_path)
-        topic = one_topic(topic_data, path, 0)
+        topic_path = join(root_path, branch_name, course_data.get('en_name'))
+        topic_path = create_path(topic_data, topic_path, data_root, root_path)
+        topic = one_topic(topic_data, topic_path, 0)
         topics.append(topic)
 
         lst = Element('ul')
         for sub_data in topic_data:
-            sub_path = join(path, sub_data.get('en_name'))
-            sub_path = create_path(sub_data, sub_path, data_root, root_path)
+            sub_path = create_path(sub_data, topic_path, data_root, root_path)
             sub = one_topic(sub_data, sub_path, 1)
             lst.append(sub)
         if len(lst):
