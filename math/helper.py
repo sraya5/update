@@ -140,14 +140,14 @@ def remove_number_sign(path: str):
     return path
 
 
-def index2string(index: dict):
-    lst = []
+def index2string(index: dict, lst: list):
     for name in index:
         if index[name] is False:
             lst.append(name)
         elif type(index[name]) is dict:
-            index2string(index[name])
-    return '\n'.join(lst)
+            index2string(index[name], lst)
+    if lst:
+        return '\n'.join(lst)
 
 
 def dir_play(input_path: str, func, args=(), output_path='', info_print=True, index: dict | None = None):

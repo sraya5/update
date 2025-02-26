@@ -1,6 +1,6 @@
 from os import makedirs, stat, chdir
 from json import load
-from subprocess import run,DEVNULL, CalledProcessError
+from subprocess import run, DEVNULL, CalledProcessError
 from copy import deepcopy
 from shutil import copy
 from datetime import datetime
@@ -9,7 +9,6 @@ from xml.etree.ElementTree import XMLParser, parse
 from PyLyX import LyX, convert, xhtml_style, correct_name
 from helper import *
 from sitemap_creator import *
-from branches_creator import paste_branches
 
 with open(r'data\math_pages.json', 'r') as f:
     PAGES = load(f)
@@ -20,7 +19,7 @@ PARSER = XMLParser(encoding="utf-8")
 TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot()
 CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
-INPUT_PATH = r'C:\Users\sraya\Documents\HUJI\summaries'
+INPUT_PATH = r'C:\Users\sraya\Documents\Sites\Mathematics\summaries'
 OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
@@ -68,7 +67,7 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
     if output_path:
         print('convert summaries to xhtml...')
         index_xhtml = dir_play(input_path, up_output, ('xhtml', time), output_path, info_print=False)
-        index_string = index2string(index_xhtml)
+        index_string = index2string(index_xhtml, [])
         if index_string:
             print('\n\nThe conversion of the following files to xhtml is failed:')
             print(index_string)
@@ -76,18 +75,17 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
         print('\n******start convert summaries to pdf******')
         index_pdf = dir_play(input_path, up_output, ('pdf4', time), pdf_path)
         print('\n******end convert summaries to pdf******')
-        index_string = index2string(index_pdf)
-        if index_string:
-            print('\n\nThe conversion of the following files to pdf is failed:')
-            print(index_string)
+        index_string = index2string(index_pdf, [])
+        print('\n\nThe conversion of the following files to pdf is failed:')
+        print(index_string)
+        print(index_pdf)
     if lyx_path:
         print('\n******start copy LyX files******')
         index_lyx = dir_play(input_path, up_output, ('lyx', time), lyx_path)
         print('\n******end copy LyX files******')
-        index_string = index2string(index_lyx)
-        if index_string:
-            print('\n\nThe coping of the following files failed:')
-            print(index_string)
+        index_string = index2string(index_lyx, [])
+        print('\n\nThe coping of the following files failed:')
+        print(index_string)
 
     with open('data/last_play.txt', 'w') as last_play:
         now = datetime.now()
@@ -120,6 +118,7 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
         paste_list(join(SITE_ROOT, 'about', 'sitemap', 'index.html'), lst)
     if branches:
         print('create branches...')
+        from branches_creator import paste_branches
         paste_branches(SITEMAP_XML, SITE_ROOT, '../')
     if summaries:
         up_all(INPUT_PATH, OUTPUT_PATH, test_mode)
