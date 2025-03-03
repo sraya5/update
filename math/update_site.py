@@ -127,4 +127,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main()
+    main(pages=False, test_mode=True, sitemap=False)
