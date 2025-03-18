@@ -38,7 +38,13 @@ def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
     body2 = root2[1]
     title = body2.findall(".//*[@class='layout Title']")
     if title:
-        body2.remove(title[0])
+        if title[0] in body2:
+            body2.remove(title[0])
+        else:
+            for e in body2:
+                if title[0] in e:
+                    e.remove(title[0])
+                    break
     for elem in body2:
         content_column.append(elem)
 

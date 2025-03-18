@@ -14,6 +14,8 @@ with open(r'data\math_pages.json', 'r') as f:
     PAGES = load(f)
 with open(r'data\replaces.json', 'r') as f:
     REPLACES = load(f)
+with open(join(REFERENCES, 'html', 'analytics.html'), 'r', encoding='utf8') as f:
+    ANALYTICS = f.read()
 
 PARSER = XMLParser(encoding="utf-8")
 TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot()
@@ -23,6 +25,25 @@ INPUT_PATH = r'C:\Users\sraya\Documents\Sites\Mathematics\summaries'
 OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
+
+
+def insert_analytics(pages: dict[str, str], analytics: str):
+    for page in pages:
+        path = pages[page]
+        with open(path, 'r', encoding='utf8') as old:
+            with open(path + '_', 'w', encoding='utf8') as new:
+                line = old.readline()
+                while '</head>' not in line:
+                    new.write(line)
+                    line = old.readline()
+                line += f'\n{analytics}\n'
+                new.write(line)
+                for line in old:
+                    new.write(line)
+
+        if exists(path):
+            remove(path)
+        rename(path + '_', path)
 
 
 def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
@@ -76,16 +97,16 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
         index_pdf = dir_play(input_path, up_output, ('pdf4', time), pdf_path)
         print('\n******end convert summaries to pdf******')
         index_string = index2string(index_pdf, [])
-        print('\n\nThe conversion of the following files to pdf is failed:')
-        print(index_string)
-        print(index_pdf)
+        if index_string:
+            print('\n\nThe conversion of the following files to pdf is failed:')
+            print(index_string)
     if lyx_path:
-        print('\n******start copy LyX files******')
-        index_lyx = dir_play(input_path, up_output, ('lyx', time), lyx_path)
-        print('\n******end copy LyX files******')
+        print('\ncopy LyX files...')
+        index_lyx = dir_play(input_path, up_output, ('lyx', time), lyx_path, info_print=False)
         index_string = index2string(index_lyx, [])
-        print('\n\nThe coping of the following files failed:')
-        print(index_string)
+        if index_string:
+            print('\n\nThe coping of the following files failed:')
+            print(index_string)
 
     with open('data/last_play.txt', 'w') as last_play:
         now = datetime.now()
@@ -110,6 +131,7 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
     if pages:
         site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
                   wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
+        insert_analytics(PAGES, ANALYTICS)
         html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
         html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
     if sitemap:
@@ -127,4 +149,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main(pages=False, test_mode=True, sitemap=False)
+    main()
