@@ -1,9 +1,10 @@
-from os import remove, chmod, makedirs
+from os import remove, chmod, makedirs, chdir
 from os.path import exists, join, split, isdir
 from shutil import rmtree, copy
 from stat import S_IWRITE
 from requests import get
 from requests.exceptions import ConnectionError
+from subprocess import run, DEVNULL, CalledProcessError
 from xml.etree.ElementTree import Element, tostring
 from update.math.helper import dir_play
 
@@ -95,3 +96,16 @@ def one_file(src: str, dst: str):
 
 def copy_wp(src, dst):
     dir_play(src, one_file, output_path=dst, info_print=False)
+
+
+def git_update(output_path):
+    try:
+        print('\nupdate site with git.\nthis will take some time, please wait.')
+        chdir(output_path)
+        run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
+        print('successful update site with git.')
+    except CalledProcessError as e:
+        print('an error occurred when update site with git.')
+        print(f'error massage: "{e}"')

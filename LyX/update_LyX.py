@@ -1,6 +1,6 @@
 from os.path import join
 from json import load
-from update.wp2html import site2html
+from update.wp2html import site2html, git_update
 
 REAL_SITE = 'https://lyx.srayaa.com'
 SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\lyx'
@@ -16,3 +16,4 @@ if __name__ == '__main__':
     site2html(PAGES, REPLACES, ('https://lyx.srayaa.com/references_files/css/main.css',),
               wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'),
               wp_includes=join(REFERENCES, 'wp-includes'))
+    git_update(SITE_ROOT)

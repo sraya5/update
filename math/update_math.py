@@ -1,10 +1,9 @@
-from os import makedirs, stat, chdir
+from os import makedirs, stat
 from json import load
-from subprocess import run, DEVNULL, CalledProcessError
 from copy import deepcopy
 from shutil import copy
 from datetime import datetime
-from update.wp2html import site2html
+from update.wp2html import site2html, git_update
 from xml.etree.ElementTree import XMLParser, parse
 from PyLyX import LyX, convert, xhtml_style, correct_name
 from helper import *
@@ -114,19 +113,6 @@ def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_
         last_play.write(now[:19])
 
 
-def git_update(output_path):
-    try:
-        print('\nupdate site with git.\nthis will take some time, please wait.')
-        chdir(output_path)
-        run(['git', 'add', '.'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        run(['git', 'commit', '-m', 'auto commit'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        run(['git', 'push'], check=True, stdout=DEVNULL, stderr=DEVNULL)
-        print('successful update site with git.')
-    except CalledProcessError as e:
-        print('an error occurred when update site with git.')
-        print(f'error massage: "{e}"')
-
-
 def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=False):
     if pages:
         site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
@@ -149,4 +135,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main()
+    main(summaries=False)
