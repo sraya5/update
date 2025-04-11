@@ -1,15 +1,13 @@
-from xml.etree.ElementTree import Element, tostring, fromstring, indent
+from xml.etree.ElementTree import Element, tostring, indent
 from lxml import etree, html
 import re
-from os.path import isfile, isdir, split, join, exists, splitext
-from os import scandir, remove
+from os.path import split, join, splitext, isdir, isfile, exists
+from os import remove, scandir
 
 REAL_SITE = 'https://math.srayaa.com'
 SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\math'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
 REFERENCES = join(SITE_ROOT, r'references_files')
-with open(join(REFERENCES, 'xml', 'sitemap.xml'), 'r', encoding='utf8') as f:
-    SITEMAP_XML = fromstring(f.read())
 
 
 def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
@@ -52,8 +50,6 @@ def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
     for screen in {'desktop'}:
         pdf_link = root1.findall(f".//*[@id='pdf_logo_{screen}']")[0][0]
         pdf_link.set('href', f'{name}.pdf')
-        lyx_link = root1.findall(f".//*[@id='lyx_logo_{screen}']")[0][0]
-        lyx_link.set('href', f'{name}.lyx')
 
     # Save merged XHTML
     xhtml_bytes = tostring(root1, encoding='utf8')
@@ -156,30 +152,49 @@ def index2string(index: dict, lst: list):
         return '\n'.join(lst)
 
 
-def dir_play(input_path: str, func, args=(), output_path='', info_print=True, index: dict | None = None):
+def xml_play(element: Element, input_path: str, func, args=(), output_path='', info_print=True, index: dict | None = None):
     if index is None:
         index = {}
+    if info_print:
+        print(f'\ndirectory: {input_path}')
 
-    if exists(input_path):
-        if isfile(input_path):
-            name = split(input_path)[1]
-            if output_path:
-                result, error = func(input_path, *args, output_path)
+    i = 0
+    for e in element:
+        if 'en_name' in e.attrib:
+            i += 1
+            name = e.get('en_name')
+            for path in (join(input_path, name), join(input_path, f'{i}#{name}'),
+                         join(input_path, f'{name}.lyx'), join(input_path, f'{i}#{name}.lyx')):
+                if exists(path):
+                    break
             else:
-                result, error = func(input_path, *args)
+                i -= 1
+                continue
+        else:
+            continue
+
+        if isfile(path):
+            if output_path:
+                new_output_path = join(output_path, name) if output_path else output_path
+                result, error = func(path, *args, new_output_path)
+            else:
+                result, error = func(path, *args)
             if result:
                 index[name] = True
                 if info_print:
                     print(f'\t\t   {name}')
             elif error:
                 index[name] = False
-        elif isdir(input_path):
-            if info_print:
-                print(f'\ndirectory: {input_path}')
-            index[input_path] = {}
-            for entry in scandir(input_path):
-                new_output_path = join(output_path, entry.name) if output_path else output_path
-                dir_play(join(input_path, entry.name), func, args, new_output_path, info_print, index[input_path])
-    else:
-        raise FileNotFoundError(f'not found such file or directory: {input_path}')
+
+        elif isdir(path):
+            if exists(output_path) and isdir(output_path):
+                sub_elements = {s.get('en_name', '') for s in element}
+                for entry in scandir(output_path):
+                    if isfile(entry.name) and splitext(entry.name)[0] not in sub_elements:
+                        remove(join(path, entry.name))
+
+            index[path] = {}
+            new_output_path = join(output_path, name) if output_path else output_path
+            xml_play(e, path, func, args, new_output_path, info_print, index)
     return index
+

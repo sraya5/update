@@ -1,7 +1,7 @@
 from os import makedirs, stat
 from json import load
+from xml.etree.ElementTree import fromstring
 from copy import deepcopy
-from shutil import copy
 from datetime import datetime
 from update.wp2html import site2html, git_update
 from xml.etree.ElementTree import XMLParser, parse
@@ -15,6 +15,8 @@ with open(r'data\replaces.json', 'r') as f:
     REPLACES = load(f)
 with open(join(REFERENCES, 'html', 'analytics.html'), 'r', encoding='utf8') as f:
     ANALYTICS = f.read()
+with open(join(REFERENCES, 'xml', 'sitemap.xml'), 'r', encoding='utf8') as f:
+    SITEMAP_XML = fromstring(f.read())
 
 PARSER = XMLParser(encoding="utf-8")
 TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot()
@@ -22,6 +24,7 @@ CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
 INPUT_PATH = r'C:\Users\sraya\Documents\Sites\Mathematics\summaries'
 OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
+XML_FILE = join(OUTPUT_PATH, 'references_files', 'xml', 'sitemap.xml')
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
 
@@ -65,46 +68,34 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
         merge_xhtml(template, current, output_path, info['toc'])
         return True, False
     elif last_edit > last_play:
-        if fmt == 'lyx':
-            output_path = correct_name(output_path, '.lyx')
-            copy(input_path, output_path)
-            result = True
-        else:
+        if fmt == 'pdf4':
             output_path = correct_name(output_path, '.pdf')
             result = file.export(fmt, output_path)
-        return result, not result
-    else:
-        return False, False
+            return result, not result
+    return False, False
 
 
-def up_all(input_path: str, output_path: str, test_mode=False, pdf_path='', lyx_path=''):
+def up_all(input_path: str, output_path: str, test_mode=False):
     with open(r'data\last_play.txt', 'r') as last_play:
         time = last_play.readline()
         time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+    with open(XML_FILE, 'r', encoding='utf8') as file:
+        sitemap = fromstring(file.read())
+
+    print('convert summaries to xhtml...')
+    index_xhtml = xml_play(sitemap, input_path, up_output, ('xhtml', time), output_path, info_print=False)
+    index_string = index2string(index_xhtml, [])
+    if index_string:
+        print('\n\nThe conversion of the following files to xhtml is failed:')
+        print(index_string)
 
     if not test_mode:
-        pdf_path = lyx_path = output_path
-    if output_path:
-        print('convert summaries to xhtml...')
-        index_xhtml = dir_play(input_path, up_output, ('xhtml', time), output_path, info_print=False)
-        index_string = index2string(index_xhtml, [])
-        if index_string:
-            print('\n\nThe conversion of the following files to xhtml is failed:')
-            print(index_string)
-    if pdf_path:
         print('\n******start convert summaries to pdf******')
-        index_pdf = dir_play(input_path, up_output, ('pdf4', time), pdf_path)
+        index_pdf = xml_play(sitemap, input_path, up_output, ('pdf4', time), output_path)
         print('\n******end convert summaries to pdf******')
         index_string = index2string(index_pdf, [])
         if index_string:
             print('\n\nThe conversion of the following files to pdf is failed:')
-            print(index_string)
-    if lyx_path:
-        print('\ncopy LyX files...')
-        index_lyx = dir_play(input_path, up_output, ('lyx', time), lyx_path, info_print=False)
-        index_string = index2string(index_lyx, [])
-        if index_string:
-            print('\n\nThe coping of the following files failed:')
             print(index_string)
 
     with open('data/last_play.txt', 'w') as last_play:
@@ -135,4 +126,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main(summaries=False)
+    main()

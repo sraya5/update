@@ -6,7 +6,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 from subprocess import run, DEVNULL, CalledProcessError
 from xml.etree.ElementTree import Element, tostring
-from update.math.helper import dir_play
+from update.auto_folder import dir_play
 
 
 def create_css(path: str):
