@@ -68,7 +68,7 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
         merge_xhtml(template, current, output_path, info['toc'])
         return True, False
     elif last_edit > last_play:
-        if fmt == 'pdf4':
+        if fmt.startswith('pdf'):
             output_path = correct_name(output_path, '.pdf')
             result = file.export(fmt, output_path)
             return result, not result
