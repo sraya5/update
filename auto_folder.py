@@ -23,7 +23,8 @@ def dir_play(input_path: str, func, args=(), output_path='', directories=False, 
             index[input_path] = {}
             for entry in scandir(input_path):
                 new_output_path = join(output_path, entry.name) if output_path else output_path
-                dir_play(join(input_path, entry.name), func, args, new_output_path, directories, info_print, index[input_path])
+                new_input_path = join(input_path, entry.name)
+                dir_play(new_input_path, func, args, new_output_path, directories, info_print, index[input_path])
         if isfile(input_path) or directories:
             name = split(input_path)[1]
             if output_path:
@@ -32,7 +33,7 @@ def dir_play(input_path: str, func, args=(), output_path='', directories=False, 
                 result, error = func(input_path, *args)
             if result:
                 index[name] = True
-                if info_print:
+                if info_print and isfile(input_path):
                     print(f'\t\t   {name}')
             elif error:
                 index[name] = False
