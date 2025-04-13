@@ -1,4 +1,4 @@
-from os import remove, chmod, makedirs, chdir
+from os import remove, chmod, makedirs, chdir, rename
 from os.path import exists, join, split, isdir
 from shutil import rmtree, copy
 from stat import S_IWRITE
@@ -109,3 +109,22 @@ def git_update(output_path):
     except CalledProcessError as e:
         print('an error occurred when update site with git.')
         print(f'error massage: "{e}"')
+
+
+def insert_analytics(pages: dict[str, str], analytics: str):
+    for page in pages:
+        path = pages[page]
+        with open(path, 'r', encoding='utf8') as old:
+            with open(path + '_', 'w', encoding='utf8') as new:
+                line = old.readline()
+                while '</head>' not in line:
+                    new.write(line)
+                    line = old.readline()
+                line += f'\n{analytics}\n'
+                new.write(line)
+                for line in old:
+                    new.write(line)
+
+        if exists(path):
+            remove(path)
+        rename(path + '_', path)

@@ -13,7 +13,7 @@ with open(r'data\math_pages.json', 'r') as f:
     PAGES = load(f)
 with open(r'data\replaces.json', 'r') as f:
     REPLACES = load(f)
-with open(join(REFERENCES, 'html', 'analytics.html'), 'r', encoding='utf8') as f:
+with open(join(REFERENCES, 'xhtml', 'analytics.xhtml'), 'r', encoding='utf8') as f:
     ANALYTICS = f.read()
 with open(join(REFERENCES, 'xml', 'sitemap.xml'), 'r', encoding='utf8') as f:
     SITEMAP_XML = fromstring(f.read())
@@ -27,25 +27,6 @@ OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
 XML_FILE = join(OUTPUT_PATH, 'references_files', 'xml', 'sitemap.xml')
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
-
-
-def insert_analytics(pages: dict[str, str], analytics: str):
-    for page in pages:
-        path = pages[page]
-        with open(path, 'r', encoding='utf8') as old:
-            with open(path + '_', 'w', encoding='utf8') as new:
-                line = old.readline()
-                while '</head>' not in line:
-                    new.write(line)
-                    line = old.readline()
-                line += f'\n{analytics}\n'
-                new.write(line)
-                for line in old:
-                    new.write(line)
-
-        if exists(path):
-            remove(path)
-        rename(path + '_', path)
 
 
 def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
