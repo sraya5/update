@@ -3,7 +3,7 @@ from json import load
 from xml.etree.ElementTree import fromstring
 from copy import deepcopy
 from datetime import datetime
-from update.wp2html import site2html, git_update
+from update.wp2html import site2html, git_update, insert_analytics
 from xml.etree.ElementTree import XMLParser, parse
 from PyLyX import LyX, convert, xhtml_style, correct_name
 from helper import *
@@ -95,7 +95,7 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
     if sitemap:
         print('create sitemap...')
         lst = create_list(SITEMAP_XML, '../../', SITEMAP_XML, '../../')
-        paste_list(join(SITE_ROOT, 'about', 'sitemap', 'index.html'), lst)
+        paste_list(join(SITE_ROOT, 'home', 'sitemap', 'index.html'), lst)
     if branches:
         print('create branches...')
         from branches_creator import paste_branches
