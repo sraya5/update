@@ -3,7 +3,7 @@ from json import load
 from update.wp2html import site2html, git_update, insert_analytics
 
 REAL_SITE = 'https://lyx.srayaa.com'
-SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\lyx'
+SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\sites\lyx'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\lyx\app\public'
 REFERENCES = join(SITE_ROOT, r'references_files')
 with open(r'data\lyx_pages.json', 'r') as f:

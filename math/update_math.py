@@ -23,7 +23,7 @@ TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot
 CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
 INPUT_PATH = r'C:\Users\sraya\Documents\Sites\Mathematics\summaries'
-OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\math'
+OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\sites\math'
 XML_FILE = join(OUTPUT_PATH, 'references_files', 'xml', 'sitemap.xml')
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
