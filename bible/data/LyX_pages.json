@@ -1,0 +1,11 @@
+{
+  "http://bible.local": "C:/Users/sraya/Documents/GitHub/sites/bible/index.html",
+  "http://bible.local/home/donation": "C:/Users/sraya/Documents/GitHub/sites/bible/home/donation/index.html",
+  "http://bible.local/about": "C:/Users/sraya/Documents/GitHub/sites/bible/about/index.html",
+  "http://bible.local/install": "C:/Users/sraya/Documents/GitHub/sites/bible/install/index.html",
+  "http://bible.local/files": "C:/Users/sraya/Documents/GitHub/sites/bible/files/index.html",
+  "http://bible.local/pybible": "C:/Users/sraya/Documents/GitHub/sites/bible/pybible/index.html",
+  "http://bible.local/contact": "C:/Users/sraya/Documents/GitHub/sites/bible/contact/index.html",
+
+  "http://bible.local/404": "C:/Users/sraya/Documents/GitHub/sites/bible/404.html"
+}

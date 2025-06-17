@@ -1,22 +1,22 @@
 {
-  "http://math.local": "C:/Users/sraya/Documents/GitHub/math/index.html",
-  "http://math.local/home/donation": "C:/Users/sraya/Documents/GitHub/math/home/donation/index.html",
-  "http://math.local/home/private_lessons": "C:/Users/sraya/Documents/GitHub/math/home/private_lessons/index.html",
-  "http://math.local/home/sitemap": "C:/Users/sraya/Documents/GitHub/math/home/sitemap/index.html",
+  "http://math.local": "C:/Users/sraya/Documents/GitHub/sites/math/index.html",
+  "http://math.local/home/donation": "C:/Users/sraya/Documents/GitHub/sites/math/home/donation/index.html",
+  "http://math.local/home/private_lessons": "C:/Users/sraya/Documents/GitHub/sites/math/home/private_lessons/index.html",
+  "http://math.local/home/sitemap": "C:/Users/sraya/Documents/GitHub/sites/math/home/sitemap/index.html",
 
-  "http://math.local/about": "C:/Users/sraya/Documents/GitHub/math/about/index.html",
-  "http://math.local/about/readme": "C:/Users/sraya/Documents/GitHub/math/about/readme/index.html",
-  "http://math.local/about/a_mathematician_apology": "C:/Users/sraya/Documents/GitHub/math/about/a_mathematician_apology/index.html",
-  "http://math.local/about/dedication": "C:/Users/sraya/Documents/GitHub/math/about/dedication/index.html",
+  "http://math.local/about": "C:/Users/sraya/Documents/GitHub/sites/math/about/index.html",
+  "http://math.local/about/readme": "C:/Users/sraya/Documents/GitHub/sites/math/about/readme/index.html",
+  "http://math.local/about/a_mathematician_apology": "C:/Users/sraya/Documents/GitHub/sites/math/about/a_mathematician_apology/index.html",
+  "http://math.local/about/dedication": "C:/Users/sraya/Documents/GitHub/sites/math/about/dedication/index.html",
 
-  "http://math.local/contact": "C:/Users/sraya/Documents/GitHub/math/contact/index.html",
+  "http://math.local/contact": "C:/Users/sraya/Documents/GitHub/sites/math/contact/index.html",
 
-  "http://math.local/analysis": "C:/Users/sraya/Documents/GitHub/math/analysis/index.html",
-  "http://math.local/algebra": "C:/Users/sraya/Documents/GitHub/math/algebra/index.html",
-  "http://math.local/additional_branches": "C:/Users/sraya/Documents/GitHub/math/additional_branches/index.html",
-  "http://math.local/articles": "C:/Users/sraya/Documents/GitHub/math/articles/index.html",
+  "http://math.local/analysis": "C:/Users/sraya/Documents/GitHub/sites/math/analysis/index.html",
+  "http://math.local/algebra": "C:/Users/sraya/Documents/GitHub/sites/math/algebra/index.html",
+  "http://math.local/additional_branches": "C:/Users/sraya/Documents/GitHub/sites/math/additional_branches/index.html",
+  "http://math.local/articles": "C:/Users/sraya/Documents/GitHub/sites/math/articles/index.html",
 
-  "http://math.local/404": "C:/Users/sraya/Documents/GitHub/math/404.html",
-  "http://math.local/references_files/topic": "C:/Users/sraya/Documents/GitHub/math/references_files/xhtml/topic.html",
-  "http://math.local/references_files/branch": "C:/Users/sraya/Documents/GitHub/math/references_files/xhtml/branch.html"
+  "http://math.local/404": "C:/Users/sraya/Documents/GitHub/sites/math/404.html",
+  "http://math.local/references_files/topic": "C:/Users/sraya/Documents/GitHub/sites/math/references_files/xhtml/topic.html",
+  "http://math.local/references_files/branch": "C:/Users/sraya/Documents/GitHub/sites/math/references_files/xhtml/branch.html"
 }

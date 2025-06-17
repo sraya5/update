@@ -1,11 +1,11 @@
 {
-  "http://lyx.local": "C:/Users/sraya/Documents/GitHub/LyX/index.html",
-  "http://lyx.local/home/donation": "C:/Users/sraya/Documents/GitHub/lyx/home/donation/index.html",
-  "http://lyx.local/about": "C:/Users/sraya/Documents/GitHub/LyX/about/index.html",
-  "http://lyx.local/install": "C:/Users/sraya/Documents/GitHub/LyX/install/index.html",
-  "http://lyx.local/files": "C:/Users/sraya/Documents/GitHub/LyX/files/index.html",
-  "http://lyx.local/pylyx": "C:/Users/sraya/Documents/GitHub/LyX/pylyx/index.html",
-  "http://lyx.local/contact": "C:/Users/sraya/Documents/GitHub/LyX/contact/index.html",
+  "http://lyx.local": "C:/Users/sraya/Documents/GitHub/sites/LyX/index.html",
+  "http://lyx.local/home/donation": "C:/Users/sraya/Documents/GitHub/sites/lyx/home/donation/index.html",
+  "http://lyx.local/about": "C:/Users/sraya/Documents/GitHub/sites/LyX/about/index.html",
+  "http://lyx.local/install": "C:/Users/sraya/Documents/GitHub/sites/LyX/install/index.html",
+  "http://lyx.local/files": "C:/Users/sraya/Documents/GitHub/sites/LyX/files/index.html",
+  "http://lyx.local/pylyx": "C:/Users/sraya/Documents/GitHub/sites/LyX/pylyx/index.html",
+  "http://lyx.local/contact": "C:/Users/sraya/Documents/GitHub/sites/LyX/contact/index.html",
 
-  "http://lyx.local/404": "C:/Users/sraya/Documents/GitHub/LyX/404.html"
+  "http://lyx.local/404": "C:/Users/sraya/Documents/GitHub/sites/LyX/404.html"
 }
