@@ -23,8 +23,7 @@ TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot
 CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
 JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
 INPUT_PATH = r'C:\Users\sraya\Documents\Sites\Mathematics\summaries'
-OUTPUT_PATH = r'C:\Users\sraya\Documents\GitHub\sites\math'
-XML_FILE = join(OUTPUT_PATH, 'references_files', 'xml', 'sitemap.xml')
+XML_FILE = join(SITE_ROOT, 'references_files', 'xml', 'sitemap.xml')
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
 
@@ -101,9 +100,9 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
         from branches_creator import paste_branches
         paste_branches(SITEMAP_XML, SITE_ROOT, '../')
     if summaries:
-        up_all(INPUT_PATH, OUTPUT_PATH, test_mode)
+        up_all(INPUT_PATH, SITE_ROOT, test_mode)
     if not test_mode:
-        git_update(OUTPUT_PATH)
+        git_update(SITE_ROOT)
 
 
 if __name__ == '__main__':
