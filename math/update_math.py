@@ -47,11 +47,10 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
         output_path = correct_name(output_path, '.xhtml')
         merge_xhtml(template, current, output_path, info['toc'])
         return True, False
-    elif last_edit > last_play:
-        if fmt.startswith('pdf'):
-            output_path = correct_name(output_path, '.pdf')
-            result = file.export(fmt, output_path)
-            return result, not result
+    elif last_edit > last_play and fmt.startswith('pdf'):
+        output_path = correct_name(output_path, '.pdf')
+        result = file.export(fmt, output_path)
+        return result, not result
     return False, False
 
 
@@ -106,4 +105,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main()
+    main(pages=False, test_mode=True)
