@@ -1,8 +1,8 @@
 {
-  "math.local": "math.srayaa.com",
+  "srayaa.local": "srayaa.com",
   "http://": "https://",
   "http:\\/\\/": "https:\\/\\/",
-  "://math/": "://math.srayaa.com/",
+  "://srayaa/": "://srayaa.com/",
   "/wp-content/": "/reference_files/wp-content/",
   "/wp-includes/": "/reference_files/wp-includes/"
 }

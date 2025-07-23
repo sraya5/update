@@ -13,17 +13,17 @@ with open(r'data\math_pages.json', 'r') as f:
     PAGES = load(f)
 with open(r'data\replaces.json', 'r') as f:
     REPLACES = load(f)
-with open(join(REFERENCES, 'xhtml', 'analytics.xhtml'), 'r', encoding='utf8') as f:
+with open(join(REFERENCE, 'xhtml', 'analytics.xhtml'), 'r', encoding='utf8') as f:
     ANALYTICS = f.read()
-with open(join(REFERENCES, 'xml', 'sitemap.xml'), 'r', encoding='utf8') as f:
+with open(join(REFERENCE, 'xml', 'sitemap.xml'), 'r', encoding='utf8') as f:
     SITEMAP_XML = fromstring(f.read())
 
 PARSER = XMLParser(encoding="utf-8")
-TOPIC_TEMPLATE = parse(join(REFERENCES, 'xhtml', 'topic.xhtml'), PARSER).getroot()
-CSS_FOLDER = 'https://math.srayaa.com/references_files/css'
-JS_FILES = ('https://math.srayaa.com/references_files/js/topic.js', )
+TOPIC_TEMPLATE = parse(join(REFERENCE, 'xhtml', 'topic.xhtml'), PARSER).getroot()
+CSS_FOLDER = 'https://math.srayaa.com/reference_files/css'
+JS_FILES = ('https://math.srayaa.com/reference_files/js/topic.js', )
 INPUT_PATH = r'C:\Users\sraya\Documents\Sites\Mathematics\summaries'
-XML_FILE = join(SITE_ROOT, 'references_files', 'xml', 'sitemap.xml')
+XML_FILE = join(SITE_ROOT, 'reference_files', 'xml', 'sitemap.xml')
 REPLACES_IMG_PATH = {INPUT_PATH: REAL_SITE}
 REPLACES_IMG_PATH.update({f'{i}#': '' for i in range(10)})
 
@@ -40,7 +40,7 @@ def up_output(input_path: str, fmt: str, last_play: datetime, output_path: str):
     makedirs(split(output_path)[0], exist_ok=True)
     file = LyX(input_path)
     if fmt == 'xhtml':
-        current, info = convert(file.get_doc(), ('https://math.srayaa.com/references_files/css/topic.css', ), CSS_FOLDER, JS_FILES,
+        current, info = convert(file.get_doc(), ('https://math.srayaa.com/reference_files/css/topic.css', ), CSS_FOLDER, JS_FILES,
                                 js_in_head=True, keep_data=True, replaces=REPLACES_IMG_PATH)
         template = deepcopy(TOPIC_TEMPLATE)
         xhtml_style(current, output_path, False, info)
@@ -85,11 +85,11 @@ def up_all(input_path: str, output_path: str, test_mode=False):
 
 def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=False):
     if pages:
-        site2html(PAGES, REPLACES, ('https://math.srayaa.com/references_files/css/main.css',),
-                  wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCES, 'wp-content'), wp_includes=join(REFERENCES, 'wp-includes'))
+        site2html(PAGES, REPLACES, ('https://math.srayaa.com/reference_files/css/main.css',),
+                  wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCE, 'wp-content'), wp_includes=join(REFERENCE, 'wp-includes'))
         insert_analytics(PAGES, ANALYTICS)
-        html2xhtml(join(REFERENCES, 'xhtml', 'branch.html'), join(REFERENCES, 'xhtml', 'branch.xhtml'), True)
-        html2xhtml(join(REFERENCES, 'xhtml', 'topic.html'), join(REFERENCES, 'xhtml', 'topic.xhtml'), True)
+        html2xhtml(join(REFERENCE, 'xhtml', 'branch.html'), join(REFERENCE, 'xhtml', 'branch.xhtml'), True)
+        html2xhtml(join(REFERENCE, 'xhtml', 'topic.html'), join(REFERENCE, 'xhtml', 'topic.xhtml'), True)
     if sitemap:
         print('create sitemap...')
         lst = create_list(SITEMAP_XML, '../../', SITEMAP_XML, '../../')
@@ -105,4 +105,4 @@ def main(pages=True, sitemap=True, branches=True, summaries=True, test_mode=Fals
 
 
 if __name__ == '__main__':
-    main(pages=False, test_mode=True)
+    main()

@@ -7,7 +7,7 @@ from os import remove, scandir
 REAL_SITE = 'https://math.srayaa.com'
 SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\sites\math'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
-REFERENCES = join(SITE_ROOT, r'references_files')
+REFERENCE = join(SITE_ROOT, r'reference_files')
 
 
 def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):

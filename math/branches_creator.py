@@ -2,9 +2,9 @@ from os import remove, rename
 from os.path import join, exists
 from copy import deepcopy
 from xml.etree.ElementTree import Element, fromstring, tostring, indent
-from helper import REFERENCES, create_path, one_column
+from helper import REFERENCE, create_path, one_column
 
-with open(join(REFERENCES, 'xhtml', 'branch.xhtml'), 'r', encoding='utf8') as f:
+with open(join(REFERENCE, 'xhtml', 'branch.xhtml'), 'r', encoding='utf8') as f:
     element = fromstring(f.read())
     column = element.findall(".//*[@id='first_col']")[0]
     indent(column[0])
