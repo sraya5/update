@@ -3,6 +3,6 @@
   "http://": "https://",
   "http:\\/\\/": "https:\\/\\/",
   "://bible/": "://bible.srayaa.com/",
-  "/wp-content/": "/references_files/wp-content/",
-  "/wp-includes/": "/references_files/wp-includes/"
+  "/wp-content/": "/reference_files/wp-content/",
+  "/wp-includes/": "/reference_files/wp-includes/"
 }

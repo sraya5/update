@@ -15,7 +15,7 @@ with open(join(REFERENCE, 'xhtml', 'analytics.xhtml'), 'r', encoding='utf8') as 
 
 
 if __name__ == '__main__':
-    site2html(PAGES, REPLACES, ('https://lyx.srayaa.com/references_files/css/main.css',),
+    site2html(PAGES, REPLACES, ('https://lyx.srayaa.com/reference_files/css/main.css',),
               wp_root=WP_ROOT, site_root=SITE_ROOT, wp_content=join(REFERENCE, 'wp-content'),
               wp_includes=join(REFERENCE, 'wp-includes'))
     insert_analytics(PAGES, ANALYTICS)
