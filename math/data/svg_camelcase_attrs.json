@@ -1,0 +1,20 @@
+[
+    ["viewbox",              "viewBox"],
+    ["tablevalues",          "tableValues"],
+    ["gradienttransform",    "gradientTransform"],
+    ["gradientunits",        "gradientUnits"],
+    ["patternunits",         "patternUnits"],
+    ["patterncontentunits",  "patternContentUnits"],
+    ["markerwidth",          "markerWidth"],
+    ["markerheight",         "markerHeight"],
+    ["refx",                 "refX"],
+    ["refy",                 "refY"],
+    ["startoffset",          "startOffset"],
+    ["stddeviation",         "stdDeviation"],
+    ["specularconstant",     "specularConstant"],
+    ["specularexponent",     "specularExponent"],
+    ["diffuseconstant",      "diffuseConstant"],
+    ["kernelmatrix",         "kernelMatrix"],
+    ["xchannelselector",     "xChannelSelector"],
+    ["ychannelselector",     "yChannelSelector"]
+]

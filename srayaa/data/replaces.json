@@ -1,7 +1,9 @@
 {
   "srayaa.local": "srayaa.com",
-  "http://": "https://",
-  "http:\\/\\/": "https:\\/\\/",
+  "http://srayaa.local": "https://srayaa.srayaa.com",
+  "http:\\/\\/srayaa.local": "https:\\/\\/srayaa.srayaa.com",
+  "http://srayaa.com": "https://srayaa.com",
+  "http:\\/\\/srayaa.com": "https:\\/\\/srayaa.com",
   "://srayaa/": "://srayaa.com/",
   "/wp-content/": "/reference_files/wp-content/",
   "/wp-includes/": "/reference_files/wp-includes/"

@@ -1,7 +1,9 @@
 {
   "bible.local": "bible.srayaa.com",
-  "http://": "https://",
-  "http:\\/\\/": "https:\\/\\/",
+  "http://bible.local": "https://bible.srayaa.com",
+  "http:\\/\\/bible.local": "https:\\/\\/bible.srayaa.com",
+  "http://bible.srayaa.com": "https://bible.srayaa.com",
+  "http:\\/\\/bible.srayaa.com": "https:\\/\\/bible.srayaa.com",
   "://bible/": "://bible.srayaa.com/",
   "/wp-content/": "/reference_files/wp-content/",
   "/wp-includes/": "/reference_files/wp-includes/"

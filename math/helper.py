@@ -1,6 +1,8 @@
+from pathlib import Path
 from xml.etree.ElementTree import Element, tostring, indent
 from lxml import etree, html
 import re
+import json
 from os.path import split, join, splitext, isdir, isfile, exists
 from os import remove, scandir
 
@@ -8,6 +10,7 @@ REAL_SITE = 'https://math.srayaa.com'
 SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\sites\math'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
 REFERENCE = join(SITE_ROOT, r'reference_files')
+HERE = Path(__file__).parent / 'data'
 
 
 def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
@@ -57,7 +60,35 @@ def merge_xhtml(root1: Element, root2: Element, output_file: str, toc: Element):
         file.write(xhtml_bytes)
 
 
-def html2xhtml(html_file, output_file, remove_old=False):
+def load_svg_case_data(elements_json: str, attrs_json: str):
+    """Load SVG camelCase mappings from JSON files."""
+    with open(elements_json, "r", encoding="utf-8") as f:
+        svg_elements = [tuple(pair) for pair in json.load(f)]
+    with open(attrs_json, "r", encoding="utf-8") as f:
+        svg_attrs = [tuple(pair) for pair in json.load(f)]
+    return svg_elements, svg_attrs
+
+
+def fix_svg_case(xhtml_str, svg_elements, svg_attrs):
+    """Fix SVG element and attribute names that lxml lowercased."""
+    def fix_svg_block(match):
+        block = match.group(0)
+        for lower, proper in svg_elements:
+            block = re.sub(rf'</{lower}(\s|>)',  rf'</{proper}\1', block, flags=re.IGNORECASE)
+            block = re.sub(rf'<{lower}(\s|>|/)', rf'<{proper}\1',  block, flags=re.IGNORECASE)
+        for lower, proper in svg_attrs:
+            block = re.sub(rf'\b{lower}=', f'{proper}=', block, flags=re.IGNORECASE)
+        return block
+
+    return re.sub(r'<svg[\s\S]*?</svg>', fix_svg_block, xhtml_str, flags=re.IGNORECASE)
+
+
+def html2xhtml(html_file, output_file, remove_old=False,
+               elements_json: Path | str = HERE / "svg_camelcase_elements.json",
+               attrs_json: Path | str = HERE / "svg_camelcase_attrs.json"):
+    # Load SVG case mappings from JSON
+    svg_elements, svg_attrs = load_svg_case_data(elements_json, attrs_json)
+
     # Read input HTML file as UTF-8
     with open(html_file, "r", encoding="utf-8") as file:
         html_content = file.read()
@@ -67,7 +98,7 @@ def html2xhtml(html_file, output_file, remove_old=False):
 
     # Convert the HTML content to a lxml tree, ensuring it correctly handles encoding
     parser = html.HTMLParser(encoding="utf-8")
-    tree = html.fromstring(html_content, parser=parser)
+    tree = html.document_fromstring(html_content, parser=parser)
 
     # Convert back to properly formatted XHTML
     xhtml_bytes = etree.tostring(tree, pretty_print=True, method="xml", encoding="utf-8")
@@ -83,7 +114,11 @@ def html2xhtml(html_file, output_file, remove_old=False):
     if 'xmlns="http://www.w3.org/1999/xhtml"' not in xhtml_str:
         xhtml_str = xhtml_str.replace("<html", '<html xmlns="http://www.w3.org/1999/xhtml"', 1)
 
-    xhtml_str.replace('/>', '/ >')
+    # Ensure self-closing tags have a space before /> for XHTML compatibility
+    xhtml_str = xhtml_str.replace('/>', ' />')
+
+    # Restore case-sensitive SVG element/attribute names that lxml lowercased
+    xhtml_str = fix_svg_case(xhtml_str, svg_elements, svg_attrs)
 
     # Write output file as UTF-8
     with open(output_file, "w", encoding="utf-8") as file:
@@ -197,4 +232,3 @@ def xml_play(element: Element, input_path: str, func, args=(), output_path='', i
             new_output_path = join(output_path, name) if output_path else output_path
             xml_play(e, path, func, args, new_output_path, info_print, index)
     return index
-
