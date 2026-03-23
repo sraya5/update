@@ -1,9 +1,8 @@
 {
   "lyx.local": "lyx.srayaa.com",
-  "http://lyx.local": "https://lyx.srayaa.com",
-  "http:\\/\\/lyx.local": "https:\\/\\/lyx.srayaa.com",
-  "http://lyx.srayaa.com": "https://lyx.srayaa.com",
-  "http:\\/\\/lyx.srayaa.com": "https:\\/\\/lyx.srayaa.com",
+  "http://": "https://",
+  "http:\\/\\/": "https:\\/\\/",
+  "https://www.w3.org/": "http://www.w3.org/",
   "://lyx/": "://lyx.srayaa.com/",
   "/wp-content/": "/reference_files/wp-content/",
   "/wp-includes/": "/reference_files/wp-includes/"
