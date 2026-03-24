@@ -4,6 +4,7 @@
   "http:\\/\\/": "https:\\/\\/",
   "https://www.w3.org/": "http://www.w3.org/",
   "://lyx/": "://lyx.srayaa.com/",
+  "install/script_install/": "install/script_install.html",
   "/wp-content/": "/reference_files/wp-content/",
   "/wp-includes/": "/reference_files/wp-includes/"
 }
