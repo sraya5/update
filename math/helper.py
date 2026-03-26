@@ -7,7 +7,7 @@ from os.path import split, join, splitext, isdir, isfile, exists
 from os import remove, scandir
 
 REAL_SITE = 'https://math.srayaa.com'
-SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\sites\math'
+SITE_ROOT = r'C:\Users\sraya\Documents\programming\sites\math'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\math\app\public'
 REFERENCE = join(SITE_ROOT, r'reference_files')
 HERE = Path(__file__).parent / 'data'
