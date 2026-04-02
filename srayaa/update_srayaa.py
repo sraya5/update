@@ -3,10 +3,10 @@ from json import load
 from update.wp2html import site2html, git_update, insert_analytics
 
 REAL_SITE = 'https://srayaa.com'
-SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\sites\srayaa'
+SITE_ROOT = r'C:\Users\sraya\Documents\coding\sites\srayaa'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\srayaa\app\public'
 REFERENCE = join(SITE_ROOT, r'reference_files')
-with open(r'data\home_pages.json', 'r') as f:
+with open(r'data/srayaa_pages.json', 'r') as f:
     PAGES = load(f)
 with open(r'data\replaces.json', 'r') as f:
     REPLACES = load(f)

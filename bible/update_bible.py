@@ -3,7 +3,7 @@ from json import load
 from update.wp2html import site2html, git_update, insert_analytics
 
 REAL_SITE = 'https://bible.srayaa.com'
-SITE_ROOT = r'C:\Users\sraya\Documents\GitHub\sites\bible'
+SITE_ROOT = r'C:\Users\sraya\Documents\coding\sites\bible'
 WP_ROOT = r'C:\Users\sraya\Documents\LocalWP\bible\app\public'
 REFERENCE = join(SITE_ROOT, r'reference_files')
 with open(r'data\bible_pages.json', 'r') as f:

@@ -2,7 +2,7 @@ from json import load
 from os.path import isfile, isdir, join, exists, split
 from os import scandir, makedirs, remove, rename
 from PyLyX import LyX
-from PyLyX.objects.Environment import Environment, Container
+from PyLyX.loader.Environment import Environment, Container
 from update.math.helper import remove_number_sign
 
 LYX_FILES_OLD = r'C:\Users\sraya\Documents\HUJI\archive\for_LyX\summaries'
